@@ -231,6 +231,11 @@
     color: rgb(var(--color-foreground-rgb) / 0.8);
   }
 
+  .shopco-pdp .product-information__media {
+    width: 100%;
+    min-width: 0;
+  }
+
   .shopco-pdp .product-information__media .product-media-container:not(.dialog-zoomed-gallery *) {
     background: var(--shopco-gallery-background);
     border-radius: var(--shopco-gallery-radius);
@@ -266,6 +271,31 @@
     inline-size: 100%;
     max-inline-size: 100%;
     min-inline-size: 0;
+  }
+
+  .shopco-pdp
+    .product-information__media
+    .media-gallery--carousel
+    slideshow-component.slideshow--single-media {
+    inline-size: min(100%, var(--shopco-gallery-max-height));
+    min-inline-size: min(100%, var(--shopco-gallery-max-height));
+    width: min(100%, var(--shopco-gallery-max-height));
+  }
+
+  .shopco-pdp
+    .product-information__media
+    .slideshow--single-media
+    slideshow-slide {
+    content-visibility: visible;
+    min-block-size: var(--shopco-gallery-max-height);
+  }
+
+  .shopco-pdp
+    .product-information__media
+    .slideshow--single-media
+    slideshow-slide[aria-hidden='false']
+    .product-media-container {
+    min-block-size: var(--shopco-gallery-max-height);
   }
 
   .shopco-pdp .product-information__media .media-gallery--carousel slideshow-slides {
@@ -537,7 +567,7 @@
     .shopco-pdp
       .product-information__media
       .product-media-container.constrain-height:not(.dialog-zoomed-gallery *) {
-      --constrained-min-height: 0;
+      --constrained-min-height: 280px;
       --viewport-offset: 400px;
       max-height: var(--shopco-gallery-max-height);
     }
@@ -553,7 +583,7 @@
     .shopco-pdp
       .product-information__media
       .media-gallery--carousel
-      slideshow-component:has(slideshow-controls[thumbnails]) {
+      slideshow-component:is(:has(slideshow-controls[thumbnails]), .slideshow--single-media) {
       align-items: start;
       column-gap: var(--shopco-thumb-gap);
     }
@@ -633,6 +663,17 @@
       inline-size: var(--shopco-gallery-width);
       max-inline-size: 100%;
       min-inline-size: var(--shopco-gallery-width);
+    }
+
+    .shopco-pdp
+      .product-information--media-left
+      .product-information__media
+      .media-gallery--carousel
+      slideshow-component.slideshow--single-media:not(:has(slideshow-controls[thumbnails])) {
+      inline-size: min(100%, var(--shopco-gallery-max-height));
+      max-inline-size: 100%;
+      min-inline-size: min(100%, var(--shopco-gallery-max-height));
+      width: min(100%, var(--shopco-gallery-max-height));
     }
 
     .shopco-pdp .product-information--media-left .product-details {

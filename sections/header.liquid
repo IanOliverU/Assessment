@@ -781,6 +781,11 @@
         --header-left: auto;
         --header-right: minmax(max-content, 1fr);
       }
+
+      #header-component[data-search-display-type='bar'] &:has(.search-action--bar-enabled) {
+        --header-left: auto;
+        --header-right: minmax(0, 1fr);
+      }
     }
 
     @media screen and (max-width: 749px) {

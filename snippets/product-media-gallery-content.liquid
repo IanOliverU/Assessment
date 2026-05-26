@@ -101,23 +101,37 @@
     endif
   endif
 
-  assign sorted_media = '' | split: ','
-  if selected_variant_media
-    assign sorted_media = sorted_media | concat: selected_product.media | where: 'id', selected_variant_media.id
-
-    for media in selected_product.media
-      if block_settings.hide_variants and variant_images contains media.src and sorted_media.size > 0
-        continue
-      endif
-
-      if media.id != selected_variant_media.id
-        assign found_media = selected_product.media | where: 'id', media.id
-        assign sorted_media = sorted_media | concat: found_media
-      endif
-    endfor
-  else
+  if selected_product.media.size == 1
     assign sorted_media = selected_product.media
+  else
+    assign sorted_media = '' | split: ','
+    if selected_variant_media
+      assign selected_variant_media_id = selected_variant_media.id | append: ''
+      assign sorted_media = selected_product.media | where: 'id', selected_variant_media_id
+
+      for media in selected_product.media
+        if block_settings.hide_variants and variant_images contains media.src and sorted_media.size > 0
+          continue
+        endif
+
+        assign media_id = media.id | append: ''
+        if media_id != selected_variant_media_id
+          assign found_media = selected_product.media | where: 'id', media.id
+          assign sorted_media = sorted_media | concat: found_media
+        elsif sorted_media.size == 0
+          assign found_media = selected_product.media | where: 'id', media.id
+          assign sorted_media = sorted_media | concat: found_media
+        endif
+      endfor
+    else
+      assign sorted_media = selected_product.media
+    endif
+
+    if sorted_media.size == 0 and selected_product.media.size > 0
+      assign sorted_media = selected_product.media
+    endif
   endif
+
   assign has_image_drop = sorted_media | has: 'media_type', 'image'
 
   # Determine if we're in single column mode (carousel or grid with one column)
@@ -398,7 +412,7 @@
       {% endfor %}
     {% endcapture %}
 
-    {% if sorted_media.size > 1 %}
+    {% if sorted_media.size > 0 %}
       {% capture controls %}
         {% if render_slideshow_controls %}
           {%- render 'slideshow-controls',
@@ -976,6 +990,14 @@
     @media screen and (max-width: 749px) {
       grid-area: unset;
     }
+  }
+
+  .product-media-gallery__slideshow--single-media slideshow-slide[aria-hidden='false'] {
+    content-visibility: visible;
+  }
+
+  .product-media-gallery__slideshow--single-media slideshow-slide .product-media-container {
+    width: 100%;
   }
 
   /* Display grid view as a carousel on mobile, grid on desktop */

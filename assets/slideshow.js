@@ -531,8 +531,9 @@ export class Slideshow extends Component {
       }
     }
 
-    if (this.refs.slides?.[0]) {
-      this.refs.slides[0].setAttribute('aria-hidden', 'false');
+    const visibleSlide = this.slides?.[0];
+    if (visibleSlide) {
+      visibleSlide.setAttribute('aria-hidden', 'false');
     }
   }
 

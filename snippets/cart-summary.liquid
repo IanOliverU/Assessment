@@ -3,9 +3,57 @@
 
   @param {string} [accelerated_checkout_buttons_layout] - { 'vertical' } Forced layout of the additional checkout buttons, instead of relying on platform's layout.
   @param {string} [section_id] - The section ID for cart discount component.
+  @param {boolean} [shopco_layout] - SHOP.CO cart page summary styling
 {%- enddoc -%}
 
-<div class="cart-totals">
+{% liquid
+  assign shopco_layout = shopco_layout | default: false
+
+  if settings.currency_code_enabled_cart_total
+    assign total_price = cart.total_price | money_with_currency
+  else
+    assign total_price = cart.total_price | money
+  endif
+
+  if settings.currency_code_enabled_cart_items
+    assign subtotal_price = cart.items_subtotal_price | money_with_currency
+  else
+    assign subtotal_price = cart.items_subtotal_price | money
+  endif
+%}
+
+<div class="cart-totals{% if shopco_layout %} shopco-cart-summary{% endif %}">
+  {% if shopco_layout %}
+    <h2 class="shopco-cart-summary__heading">Order Summary</h2>
+
+    <div class="shopco-cart-summary__rows">
+      <div class="shopco-cart-summary__row">
+        <span class="shopco-cart-summary__label">{{ 'content.cart_subtotal' | t }}</span>
+        <span class="shopco-cart-summary__value">{{ subtotal_price }}</span>
+      </div>
+
+      {%- if cart.cart_level_discount_applications.size > 0 -%}
+        {%- for discount in cart.cart_level_discount_applications -%}
+          <div class="shopco-cart-summary__row shopco-cart-summary__row--discount">
+            <span class="shopco-cart-summary__label">{{ discount.title | escape }}</span>
+            <span class="shopco-cart-summary__value">-{{ discount.total_allocated_amount | money }}</span>
+          </div>
+        {%- endfor -%}
+      {%- elsif cart.total_discount > 0 -%}
+        <div class="shopco-cart-summary__row shopco-cart-summary__row--discount">
+          <span class="shopco-cart-summary__label">{{ 'content.discount' | t }}</span>
+          <span class="shopco-cart-summary__value">-{{ cart.total_discount | money }}</span>
+        </div>
+      {%- endif -%}
+
+      <div class="shopco-cart-summary__row">
+        <span class="shopco-cart-summary__label">Delivery Fee</span>
+        <span class="shopco-cart-summary__value shopco-cart-summary__value--muted">Calculated at checkout</span>
+      </div>
+    </div>
+
+    <div class="shopco-cart-summary__divider" aria-hidden="true"></div>
+  {% endif %}
   {% # We need to keep this node in place to allow morphing to work properly # %}
   <div class="cart-totals__original-container cart-primary-typography">
     {%- if cart.cart_level_discount_applications.size > 0 -%}
@@ -116,7 +164,7 @@
         {% capture cart_discount_accordion_children %}
           <details
             class="details"
-            {% if disclosure_expanded %}
+            {% if disclosure_expanded or shopco_layout %}
               open
             {% endif %}
           >
@@ -153,7 +201,7 @@
                         type="text"
                         name="discount"
                         size="8"
-                        placeholder="{{ 'content.discount_code' | t }}"
+                        placeholder="{% if shopco_layout %}Add promo code{% else %}{{ 'content.discount_code' | t }}{% endif %}"
                         required
                       >
                       <button
@@ -219,20 +267,18 @@
     </div>
   {% endif %}
 
-  {%- liquid
-    if settings.currency_code_enabled_cart_total
-      assign total_price = cart.total_price | money_with_currency
-    else
-      assign total_price = cart.total_price | money
-    endif
-  -%}
-
-  <div class="cart-totals__container{% if settings.show_installments %} cart-totals__container--has-installments{% endif %}">
+  <div class="cart-totals__container{% if settings.show_installments %} cart-totals__container--has-installments{% endif %}{% if shopco_layout %} shopco-cart-summary__total-block{% endif %}">
     <span
       class="cart-totals__item cart-totals__total"
       role="status"
     >
-      <span class="cart-totals__total-label cart-primary-typography">{{ 'content.cart_estimated_total' | t }}</span>
+      <span class="cart-totals__total-label cart-primary-typography">
+        {%- if shopco_layout -%}
+          Total
+        {%- else -%}
+          {{ 'content.cart_estimated_total' | t }}
+        {%- endif -%}
+      </span>
       <text-component
         ref="cartTotal"
         value="{{ total_price | strip_html }}"
@@ -257,11 +303,11 @@
   </div>
 </div>
 
-<div class="cart__ctas">
+<div class="cart__ctas{% if shopco_layout %} shopco-cart-summary__ctas{% endif %}">
   <button
     type="submit"
     id="checkout"
-    class="cart__checkout-button button"
+    class="cart__checkout-button button{% if shopco_layout %} shopco-cart-summary__checkout{% endif %}"
     name="checkout"
     {% if cart == empty %}
       disabled
@@ -269,8 +315,17 @@
     form="cart-form"
   >
     <span class="button-text">
-      {{ 'content.checkout' | t }}
+      {%- if shopco_layout -%}
+        Go to Checkout
+      {%- else -%}
+        {{ 'content.checkout' | t }}
+      {%- endif -%}
     </span>
+    {% if shopco_layout %}
+      <span class="shopco-cart-summary__checkout-icon svg-wrapper" aria-hidden="true">
+        {{- 'icon-arrow.svg' | inline_asset_content -}}
+      </span>
+    {% endif %}
   </button>
 
   {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
@@ -604,5 +659,228 @@
     .cart-summary--extend {
       height: 100%;
     }
+  }
+
+  /* SHOP.CO cart summary */
+  .shopco-cart-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .shopco-cart-summary__heading {
+    order: 1;
+    margin: 0 0 18px;
+    font-family: var(--font-body--family);
+    font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-foreground);
+  }
+
+  .shopco-cart-summary__rows {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .shopco-cart-summary__divider {
+    order: 3;
+  }
+
+  .shopco-cart-summary__total-block {
+    order: 4;
+  }
+
+  .shopco-cart .shopco-cart-summary .cart-actions {
+    order: 5;
+  }
+
+  .shopco-cart .cart-totals__original-container {
+    order: 10;
+  }
+
+  .shopco-cart-summary__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: var(--font-size--sm);
+    line-height: 1.3;
+  }
+
+  .shopco-cart-summary__label {
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .shopco-cart-summary__value {
+    font-weight: 700;
+    color: var(--color-foreground);
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  .shopco-cart-summary__value--muted {
+    font-weight: 500;
+    font-size: var(--font-size--xs);
+    color: rgb(var(--color-foreground-rgb) / 0.5);
+    white-space: normal;
+    text-align: end;
+    max-width: 9rem;
+  }
+
+  .shopco-cart-summary__row--discount .shopco-cart-summary__value {
+    color: #e53935;
+  }
+
+  .shopco-cart-summary__divider {
+    height: 1px;
+    background: rgb(var(--color-foreground-rgb) / 0.1);
+    margin-block: 4px 16px;
+  }
+
+  .shopco-cart .cart-totals__original-container {
+    display: none;
+  }
+
+  .shopco-cart-summary__total-block {
+    row-gap: 4px;
+    margin-bottom: 18px;
+  }
+
+  .shopco-cart-summary__total-block .cart-totals__total {
+    align-items: baseline;
+  }
+
+  .shopco-cart-summary__total-block .cart-totals__total-label {
+    font-size: clamp(1rem, 1.6vw, 1.125rem);
+    font-weight: 700;
+    color: var(--color-foreground);
+  }
+
+  .shopco-cart-summary__total-block .cart-totals__total-value {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 700;
+    color: var(--color-foreground);
+  }
+
+  .shopco-cart-summary__total-block .cart-totals__tax-note {
+    margin-block-start: 6px;
+  }
+
+  .shopco-cart .cart-actions {
+    border: none;
+    margin: 0 0 16px;
+    padding: 0;
+  }
+
+  .shopco-cart .cart-discount .details,
+  .shopco-cart .cart-note .details {
+    border: none;
+  }
+
+  .shopco-cart .cart-discount__summary,
+  .shopco-cart .cart-note__summary {
+    display: none;
+  }
+
+  .shopco-cart .cart-discount .details-content,
+  .shopco-cart .cart-note .details-content {
+    padding: 0;
+  }
+
+  .shopco-cart .cart-discount__content {
+    height: auto;
+  }
+
+  .shopco-cart .cart-discount__form {
+    padding: 0;
+    gap: 8px;
+  }
+
+  .shopco-cart .cart-discount__input {
+    background: rgb(var(--color-foreground-rgb) / 0.08);
+    border: none;
+    border-radius: 999px;
+    padding: 12px 16px;
+    font-size: var(--font-size--sm);
+    min-height: 44px;
+  }
+
+  .shopco-cart .cart-discount__input::placeholder {
+    color: rgb(var(--color-foreground-rgb) / 0.45);
+  }
+
+  .shopco-cart .cart-discount__button {
+    border-radius: 999px;
+    background: var(--color-foreground);
+    color: var(--color-background);
+    padding-inline: 20px;
+    min-height: 44px;
+    font-size: var(--font-size--sm);
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  .shopco-cart .cart-discount__button:hover {
+    background: rgb(var(--color-foreground-rgb) / 0.88);
+  }
+
+  .shopco-cart .cart-discount__codes {
+    margin-block-start: 10px;
+  }
+
+  .shopco-cart-summary__ctas {
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .shopco-cart-summary__checkout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 52px;
+    padding-inline: 24px;
+    border-radius: 999px;
+    background: var(--color-foreground);
+    color: var(--color-background);
+    border: none;
+    font-size: var(--font-size--md);
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  .shopco-cart-summary__checkout:hover {
+    background: rgb(var(--color-foreground-rgb) / 0.9);
+    color: var(--color-background);
+  }
+
+  .shopco-cart-summary__checkout .button-text {
+    color: inherit;
+  }
+
+  .shopco-cart-summary__checkout-icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+  }
+
+  .shopco-cart-summary__checkout-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .shopco-cart .cart-totals:not(:has(.cart-actions)) {
+    margin: 0;
+    padding: 0;
+    border: none;
   }
 {% endstylesheet %}

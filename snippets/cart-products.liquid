@@ -12,6 +12,7 @@
 
 {% liquid
   assign block_settings = block.settings
+  assign shopco_layout = shopco_layout | default: false
 %}
 
 <script
@@ -67,11 +68,11 @@
       method="post"
     >
       <div
-        class="cart-items spacing-style{% if block_settings.dividers %} cart-items--dividers{% endif %}"
+        class="cart-items spacing-style{% if block_settings.dividers %} cart-items--dividers{% endif %}{% if shopco_layout %} shopco-cart-items{% endif %}"
         style="{%  render 'spacing-style', settings: block_settings %} --cart-items-gap:{{ block_settings.gap | append: "px" }};"
       >
         <table
-          class="cart-items__table"
+          class="cart-items__table{% if shopco_layout %} shopco-cart-items__table{% endif %}"
           role="table"
         >
           <caption
@@ -125,7 +126,7 @@
             {% for item in cart.items %}
               <tr
                 role="row"
-                class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}"
+                class="cart-items__table-row{% if shopco_layout %} shopco-cart-items__row{% endif %}{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}"
                 ref="cartItemRows[]"
                 data-parent-key="{{ item.parent_relationship.parent.key }}"
                 data-key="{{ item.key }}"
@@ -152,7 +153,7 @@
                     %}
                     <a
                       href="{{ item.url }}"
-                      class="cart-items__media-container"
+                      class="cart-items__media-container{% if shopco_layout %} shopco-cart-items__media-container{% endif %}"
                       style="--ratio:{{ ratio }};"
                     >
                       {%- liquid
@@ -204,17 +205,28 @@
                       or item.selling_plan_allocation != null
                     -%}
                       {%- if item.product.has_only_default_variant == false and item.item_components.size == 0 -%}
-                        <dl class="cart-items__variants">
-                          {%- for option in item.options_with_values -%}
-                            <div class="cart-items__variant">
-                              <dt class="visually-hidden">{{ option.name }}:</dt>
-                              <dd>
-                                {{- option.value -}}
-                                {%- if forloop.last != true %},&nbsp;{% endif -%}
-                              </dd>
-                            </div>
-                          {%- endfor -%}
-                        </dl>
+                        {% if shopco_layout %}
+                          <div class="shopco-cart-items__meta">
+                            {%- for option in item.options_with_values -%}
+                              <p class="shopco-cart-items__meta-line">
+                                <span class="shopco-cart-items__meta-label">{{ option.name }}:</span>
+                                <span class="shopco-cart-items__meta-value">{{ option.value }}</span>
+                              </p>
+                            {%- endfor -%}
+                          </div>
+                        {% else %}
+                          <dl class="cart-items__variants">
+                            {%- for option in item.options_with_values -%}
+                              <div class="cart-items__variant">
+                                <dt class="visually-hidden">{{ option.name }}:</dt>
+                                <dd>
+                                  {{- option.value -}}
+                                  {%- if forloop.last != true %},&nbsp;{% endif -%}
+                                </dd>
+                              </div>
+                            {%- endfor -%}
+                          </dl>
+                        {% endif %}
                       {%- endif -%}
 
                       {%- liquid
@@ -264,7 +276,7 @@
                     {%- endif -%}
                   </div>
 
-                  <div class="cart-items__unit-price-wrapper">
+                  <div class="cart-items__unit-price-wrapper{% if shopco_layout %} shopco-cart-items__price{% endif %}">
                     <div>
                       {% if item.original_price != item.final_price %}
                         <span class="visually-hidden">{{ 'content.price_sale' | t }}</span>
@@ -303,7 +315,7 @@
                   {% assign can_update_quantity = item.instructions.can_update_quantity
                     | default: true, allow_false: true
                   %}
-                  <div class="cart-items__quantity-controls">
+                  <div class="cart-items__quantity-controls{% if shopco_layout %} shopco-cart-items__actions{% endif %}">
                     {% render 'volume-pricing-info',
                       variant: item.variant,
                       unique_id: item.index,
@@ -320,7 +332,7 @@
                     %}
 
                     <button
-                      class="button cart-items__remove"
+                      class="button cart-items__remove{% if shopco_layout %} shopco-cart-items__remove{% endif %}"
                       type="button"
                       aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
                       on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
@@ -687,8 +699,27 @@
   }
 
   @container cart-items (min-width: 720px) {
+    .shopco-cart .shopco-cart-items__row {
+      grid-template-columns: clamp(88px, 10vw, 124px) minmax(0, 1fr) auto;
+      grid-template-areas: 'media details actions';
+      grid-template-rows: auto;
+    }
+
+    .shopco-cart .cart-items__quantity,
+    .shopco-cart .cart-items__price {
+      grid-area: unset;
+    }
+
+    .shopco-cart .cart-items__quantity {
+      grid-area: actions;
+    }
+
+    .shopco-cart .cart-items__price {
+      display: none;
+    }
+
     /* Cart page: original layout */
-    .cart-items__table-row {
+    .cart-items__table-row:not(.shopco-cart-items__row) {
       --cart-item-price-width: 6rem;
 
       grid-template-columns: 7.5rem 1fr 1fr minmax(var(--cart-item-price-width), auto);
@@ -698,16 +729,16 @@
         'media details error error';
     }
 
-    .cart-items__quantity,
-    .cart-items__price {
+    .cart-items__table-row:not(.shopco-cart-items__row) .cart-items__quantity,
+    .cart-items__table-row:not(.shopco-cart-items__row) .cart-items__price {
       grid-area: initial;
     }
 
-    .cart-items__quantity {
+    .cart-items__table-row:not(.shopco-cart-items__row) .cart-items__quantity {
       margin-top: 0;
     }
 
-    .cart-items__price {
+    .cart-items__table-row:not(.shopco-cart-items__row) .cart-items__price {
       min-height: var(--minimum-touch-target);
       display: flex;
       flex-direction: column;
@@ -928,6 +959,234 @@
     to {
       filter: none;
       opacity: 1;
+    }
+  }
+
+  /* SHOP.CO cart page layout */
+  .shopco-cart .shopco-cart-items {
+    background: var(--color-background);
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    border-radius: 20px;
+    padding: clamp(16px, 2vw, 24px);
+    --cart-items-gap: 0px;
+  }
+
+  .shopco-cart .shopco-cart-items__table {
+    border-collapse: collapse;
+  }
+
+  .shopco-cart .shopco-cart-items__row {
+    --cart-item-price-width: 0;
+
+    display: grid;
+    grid-template-columns: clamp(72px, 12vw, 110px) minmax(0, 1fr) auto;
+    grid-template-areas: 'media details actions';
+    column-gap: clamp(12px, 2vw, 20px);
+    align-items: start;
+    padding-block: clamp(16px, 2vw, 22px);
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  .shopco-cart .shopco-cart-items__row:first-child {
+    padding-block-start: 0;
+  }
+
+  .shopco-cart .shopco-cart-items__row:last-child {
+    padding-block-end: 0;
+  }
+
+  .shopco-cart .cart-items--dividers .shopco-cart-items__row:not(:last-child) {
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+    margin-bottom: 0;
+    padding-bottom: clamp(16px, 2vw, 22px);
+  }
+
+  .shopco-cart .shopco-cart-items__media-container {
+    aspect-ratio: 1;
+    background: rgb(var(--color-foreground-rgb) / 0.06);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .shopco-cart .shopco-cart-items__media-container .cart-items__media-image {
+    border: none;
+    border-radius: 0;
+  }
+
+  .shopco-cart .cart-items__details {
+    grid-area: details;
+    color: var(--color-foreground);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .shopco-cart .cart-items__details * {
+    font-size: inherit;
+  }
+
+  .shopco-cart .cart-items__product-info p {
+    margin: 0;
+  }
+
+  .shopco-cart .cart-items__title {
+    font-family: var(--font-body--family);
+    font-size: clamp(0.95rem, 1.6vw, 1.0625rem);
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--color-foreground);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-transform: none;
+  }
+
+  .shopco-cart .shopco-cart-items__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+  }
+
+  .shopco-cart .shopco-cart-items__meta-line {
+    margin: 0;
+    font-size: var(--font-size--sm);
+    line-height: 1.4;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .shopco-cart .shopco-cart-items__meta-label {
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .shopco-cart .shopco-cart-items__meta-value {
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .shopco-cart .shopco-cart-items__price {
+    margin-block-start: 2px;
+    font-size: clamp(0.95rem, 1.5vw, 1.0625rem);
+    font-weight: 700;
+    color: var(--color-foreground);
+  }
+
+  .shopco-cart .shopco-cart-items__price .compare-at-price {
+    font-weight: 500;
+    color: rgb(var(--color-foreground-rgb) / 0.45);
+    font-size: 0.9em;
+    margin-inline-start: 6px;
+  }
+
+  .shopco-cart .cart-items__price {
+    display: none;
+  }
+
+  .shopco-cart .cart-items__quantity {
+    grid-area: actions;
+    margin: 0;
+    align-self: stretch;
+    justify-self: end;
+    width: auto;
+  }
+
+  .shopco-cart .shopco-cart-items__actions {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 100%;
+    padding-block: 2px;
+  }
+
+  .shopco-cart .shopco-cart-items__remove {
+    color: #e53935;
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    order: -1;
+    opacity: 0.9;
+    transition: opacity var(--animation-speed) var(--animation-easing),
+      transform var(--animation-speed) var(--animation-easing);
+  }
+
+  .shopco-cart .shopco-cart-items__remove:hover {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+
+  .shopco-cart .shopco-cart-items__remove svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .shopco-cart .cart-items__quantity .quantity-selector {
+    --quantity-selector-width: 96px;
+
+    background: rgb(var(--color-foreground-rgb) / 0.08);
+    border: none;
+    border-radius: 999px;
+    height: 36px;
+    min-height: 36px;
+    color: var(--color-foreground);
+  }
+
+  .shopco-cart .cart-items__quantity .quantity-selector:hover {
+    background: rgb(var(--color-foreground-rgb) / 0.1);
+  }
+
+  .shopco-cart .cart-items__quantity .quantity-selector :is(.quantity-minus, .quantity-plus) {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    color: var(--color-foreground);
+  }
+
+  .shopco-cart .cart-items__quantity .quantity-selector :is(.quantity-minus, .quantity-plus) svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .shopco-cart .cart-items__quantity .quantity-selector input[type='number'] {
+    color: var(--color-foreground);
+    font-size: var(--font-size--sm);
+    font-weight: 600;
+    max-width: 2rem;
+  }
+
+  .shopco-cart .cart-items__quantity-controls > .volume-pricing-info {
+    margin-inline-start: 0;
+  }
+
+  .shopco-cart .cart-items__error {
+    grid-column: 1 / -1;
+  }
+
+  @container cart-items (min-width: 720px) {
+    .shopco-cart .shopco-cart-items__row {
+      grid-template-columns: clamp(88px, 10vw, 124px) minmax(0, 1fr) auto;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .shopco-cart .shopco-cart-items {
+      padding: 14px;
+      border-radius: 16px;
+    }
+
+    .shopco-cart .shopco-cart-items__row {
+      grid-template-columns: 68px minmax(0, 1fr) auto;
+      column-gap: 12px;
+    }
+
+    .shopco-cart .cart-items__quantity .quantity-selector {
+      --quantity-selector-width: 88px;
+      height: 34px;
+      min-height: 34px;
     }
   }
 {% endstylesheet %}

@@ -31,11 +31,49 @@
   {{ block.shopify_attributes }}
 >
   <div class="{{ cart_summary_inner_class }}">
-    {% render 'cart-summary', accelerated_checkout_buttons_layout: 'vertical', section_id: section.id %}
+    {% render 'cart-summary',
+      accelerated_checkout_buttons_layout: 'vertical',
+      section_id: section.id,
+      shopco_layout: true
+    %}
   </div>
 </div>
 
 {% stylesheet %}
+  .shopco-cart .cart-summary {
+    width: 100%;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    border-radius: 20px;
+    background: var(--color-background);
+  }
+
+  .shopco-cart .cart-summary__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: clamp(18px, 2.2vw, 24px);
+    position: static;
+    width: 100%;
+  }
+
+  .shopco-cart .cart-summary--extend {
+    height: auto;
+  }
+
+  .shopco-cart .cart-summary--extend .cart-summary__inner {
+    height: auto;
+    width: 100%;
+    padding: clamp(18px, 2.2vw, 24px);
+  }
+
+  .shopco-cart .cart-summary {
+    @media screen and (max-width: 749px) {
+      border: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+      border-radius: 16px;
+    }
+  }
+
   .cart-summary__inner {
     display: flex;
     flex-direction: column;

@@ -16,11 +16,19 @@
 %}
 
 <div
-  class="cart-title spacing-style text-{{ block_settings.alignment }}"
+  class="cart-title shopco-cart-header spacing-style text-{{ block_settings.alignment }}"
   style="{% render 'spacing-style', settings: block_settings %}"
   {{ block.shopify_attributes }}
 >
-  <h1 class="{{ block_settings.type_preset | default: 'h2' }}">
+  {% unless cart.empty? or force_empty %}
+    <nav class="shopco-cart-header__breadcrumbs shopco-pdp__breadcrumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Cart</span>
+    </nav>
+  {% endunless %}
+
+  <h1 class="shopco-cart-header__heading {{ block_settings.type_preset | default: 'h2' }}">
     {%- if cart.empty? or force_empty -%}
       {{ 'content.your_cart_is_empty' | t }}
     {%- else -%}
@@ -31,6 +39,28 @@
 </div>
 
 {% stylesheet %}
+  .shopco-cart-header {
+    width: 100%;
+  }
+
+  .shopco-cart-header__breadcrumbs {
+    margin-block-end: 10px;
+  }
+
+  .shopco-cart-header__heading {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    font-family: var(--font-heading--family);
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: var(--font-heading--weight);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--color-foreground);
+  }
+
   .cart-title h1 {
     margin-block-end: 0;
     display: inline-flex;
@@ -62,6 +92,17 @@
     font-family: var(--font-paragraph--family);
     font-weight: var(--font-paragraph--weight);
     font-size: clamp(var(--font-size--3xs), 0.75em, var(--font-size--xs));
+  }
+
+  @media screen and (max-width: 749px) {
+    .shopco-cart-header__heading {
+      font-size: clamp(1.75rem, 8vw, 2.25rem);
+    }
+
+    .shopco-cart-header__breadcrumbs {
+      padding-block-start: 4px;
+      margin-block-end: 8px;
+    }
   }
 {% endstylesheet %}
 

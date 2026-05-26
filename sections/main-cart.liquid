@@ -13,7 +13,7 @@
       class="section color-{{ section.settings.color_scheme }} section--{{ section.settings.section_width }}"
     >
       <div
-        class="cart-page spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
+        class="cart-page shopco-cart spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
         style="{% render 'spacing-style', settings: section.settings %}"
       >
         <div class="cart-page__title">
@@ -33,7 +33,7 @@
     class="section color-{{ section.settings.color_scheme }} section--{{ section.settings.section_width }}"
   >
     <div
-      class="cart-page spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
+      class="cart-page shopco-cart spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
       style="{% render 'spacing-style', settings: section.settings %}"
     >
       <div class="cart-page__title">
@@ -58,10 +58,27 @@
 {% render 'cart-items-component', children: cart_items_children, section_id: section.id %}
 
 {% stylesheet %}
-  .cart-page {
+  .shopco-cart.cart-page {
+    --shopco-cart-gap: clamp(20px, 2.5vw, 32px);
+    --shopco-cart-summary-width: min(100%, 380px);
+
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0 var(--padding-5xl);
+    gap: var(--shopco-cart-gap);
+    align-items: start;
+  }
+
+  .shopco-cart .cart-page__title {
+    grid-column: 1 / -1;
+  }
+
+  .shopco-cart .cart-page__items {
+    min-width: 0;
+  }
+
+  .shopco-cart .cart-page__summary {
+    padding-top: 0;
+    width: 100%;
   }
 
   .cart-page--empty {
@@ -88,45 +105,43 @@
     grid-column: 1;
   }
 
-  .cart-page__summary {
-    padding-top: var(--padding-xl);
-  }
-
   .cart-page__title + .cart-page__items {
-    margin-block-start: var(--margin-lg);
+    margin-block-start: 0;
   }
 
   @media screen and (min-width: 750px) {
-    .cart-page {
-      grid-template-columns: 1fr min(50vw, var(--sidebar-width));
-      grid-template-rows: min-content min-content 1fr;
+    .shopco-cart.cart-page {
+      grid-template-columns: minmax(0, 1.75fr) minmax(280px, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: clamp(24px, 3vw, 40px);
+      row-gap: clamp(16px, 2vw, 24px);
     }
 
-    .cart-page__summary {
-      display: grid;
-      height: 100%;
+    .shopco-cart .cart-page__title {
+      grid-column: 1 / -1;
+    }
+
+    .shopco-cart .cart-page__items {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .shopco-cart .cart-page__summary {
+      display: block;
       grid-column: 2;
-      grid-row: 1 / -1;
-      align-self: stretch;
-      grid-template-rows: subgrid;
-      padding-top: 0;
-
-      /* needed to support blurred effect from hero section */
-      position: relative;
-    }
-
-    .section--page-width .cart-page:has(.cart-summary--extend) {
-      grid-column: 2 / 4;
-      grid-template-columns: 1fr minmax(
-          var(--sidebar-width),
-          calc((100vw - var(--page-width)) / 2 + var(--sidebar-width))
-        );
+      grid-row: 2;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--header-height, 0px) + 16px);
+      max-width: var(--shopco-cart-summary-width);
+      justify-self: end;
+      width: 100%;
     }
   }
 
-  @media screen and (min-width: 1400px) {
-    .cart-page {
-      grid-template-columns: 1fr var(--sidebar-width);
+  @media screen and (min-width: 990px) {
+    .shopco-cart.cart-page {
+      grid-template-columns: minmax(0, 1.85fr) minmax(300px, 0.95fr);
     }
   }
 {% endstylesheet %}
