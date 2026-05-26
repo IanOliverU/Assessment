@@ -1,0 +1,39 @@
+<div
+  class="hero-stat-item"
+  role="listitem"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.value != blank %}
+    <p class="hero-stat-item__value">{{ block.settings.value | escape }}</p>
+  {% endif %}
+  {% if block.settings.label != blank %}
+    <p class="hero-stat-item__label">{{ block.settings.label | escape }}</p>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Stat item",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "value",
+      "label": "Stat value",
+      "default": "200+"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Stat label",
+      "default": "International Brands"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stat item",
+      "category": "Basic"
+    }
+  ]
+}
+{% endschema %}
