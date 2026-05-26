@@ -621,12 +621,144 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
+    },
+    "dress_style_MGwyyX": {
+      "type": "dress-style",
+      "blocks": {
+        "style_card_x9hYeL": {
+          "type": "style_card",
+          "settings": {
+            "title": "Casual",
+            "image": "shopify://shop_images/image_11.png",
+            "link": "",
+            "desktop_width": "small",
+            "image_position": "center center",
+            "open_link_new_tab": false
+          }
+        },
+        "style_card_Lhy7EG": {
+          "type": "style_card",
+          "settings": {
+            "title": "Formal",
+            "image": "shopify://shop_images/image_13.png",
+            "link": "",
+            "desktop_width": "large",
+            "image_position": "center center",
+            "open_link_new_tab": false
+          }
+        },
+        "style_card_KwcPzF": {
+          "type": "style_card",
+          "settings": {
+            "title": "Party",
+            "image": "shopify://shop_images/image_12.png",
+            "link": "",
+            "desktop_width": "large",
+            "image_position": "center center",
+            "open_link_new_tab": false
+          }
+        },
+        "style_card_9LLKpz": {
+          "type": "style_card",
+          "settings": {
+            "title": "Gym",
+            "image": "shopify://shop_images/image_14.png",
+            "link": "",
+            "desktop_width": "small",
+            "image_position": "center center",
+            "open_link_new_tab": false
+          }
+        }
+      },
+      "block_order": [
+        "style_card_x9hYeL",
+        "style_card_Lhy7EG",
+        "style_card_KwcPzF",
+        "style_card_9LLKpz"
+      ],
+      "name": "Browse by Dress Style",
+      "settings": {
+        "heading": "BROWSE BY DRESS STYLE",
+        "container_max_width": 1240,
+        "padding_top": 40,
+        "padding_bottom": 40,
+        "card_height_desktop": 290,
+        "card_height_mobile": 190,
+        "gap": 20,
+        "mobile_card_layout": "stacked",
+        "section_background_color": "#F0F0F0",
+        "card_background_color": "#FFFFFF",
+        "text_color": "#000000",
+        "container_border_radius": 40,
+        "card_border_radius": 20
+      }
+    },
+    "testimonial_slider_xFnemE": {
+      "type": "testimonial-slider",
+      "blocks": {
+        "testimonial_AhtNxD": {
+          "type": "testimonial",
+          "settings": {
+            "customer_name": "Sarah M.",
+            "verified_customer": true,
+            "star_rating": 5,
+            "review_text": "The quality surprised me in the best way. The shirt holds its shape after washing and looks easy to dress up or down.",
+            "customer_label": "Verified buyer"
+          }
+        },
+        "testimonial_dRRTrz": {
+          "type": "testimonial",
+          "settings": {
+            "customer_name": "Alex K.",
+            "verified_customer": true,
+            "star_rating": 5,
+            "review_text": "I ordered a full outfit and every piece felt true to size. Shipping was quick, and the styling is exactly like the photos.",
+            "customer_label": "Los Angeles, CA"
+          }
+        },
+        "testimonial_Bqynbw": {
+          "type": "testimonial",
+          "settings": {
+            "customer_name": "James L.",
+            "verified_customer": true,
+            "star_rating": 5,
+            "review_text": "Clean design, comfortable fit, and the fabric has a really nice weight. This has become my go-to weekend look.",
+            "customer_label": "Repeat customer"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_AhtNxD",
+        "testimonial_dRRTrz",
+        "testimonial_Bqynbw"
+      ],
+      "name": "Testimonials slider",
+      "settings": {
+        "heading": "OUR HAPPY CUSTOMERS",
+        "container_max_width": 1240,
+        "cards_visible_desktop": 3,
+        "padding_top": 56,
+        "padding_bottom": 56,
+        "card_gap": 20,
+        "background_color": "#FFFFFF",
+        "card_background_color": "#FFFFFF",
+        "border_color": "#E6E6E6",
+        "text_color": "#000000",
+        "muted_text_color": "#666666",
+        "star_color": "#FFC633",
+        "verified_icon_color": "#01AB31",
+        "show_navigation_arrows": true,
+        "enable_horizontal_scroll": true,
+        "show_verified_badge": true
+      }
     }
   },
   "order": [
     "hero_jVaWmY",
     "brand_logo_strip_shopco",
     "product_list_fa6P9H",
-    "product_list_bMfzRL"
+    "product_list_bMfzRL",
+    "dress_style_MGwyyX",
+    "testimonial_slider_xFnemE"
   ]
 }

@@ -5,6 +5,7 @@
   @param {product} product_resource - The product to render
   @param {boolean} [show_unit_price] - Whether to show the unit price
   @param {boolean} [show_sale_price_first] - Whether to show the sale price first
+  @param {boolean} [show_discount_badge] - Whether to show the sale percentage badge
 {%- enddoc -%}
 
 {%- liquid
@@ -17,6 +18,7 @@
   assign show_compare_price = false
   if compare_at_price > price
     assign show_compare_price = true
+    assign discount_percentage = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
   endif
 
   if product_resource == blank
@@ -85,6 +87,9 @@
       <span class="visually-hidden">{{ 'content.price_range' | t }}&nbsp;</span>
       <span class="price">{{ price_min }} - {{ price_max }}</span>
     </span>
+    {% if show_discount_badge and discount_percentage > 0 %}
+      <span class="shopco-price__badge">-{{ discount_percentage }}%</span>
+    {% endif %}
   {% else %}
     {% comment %} Standard pricing display {% endcomment %}
     <div
@@ -123,6 +128,9 @@
           <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
           <span class="price-item--sale price">{{ price | default: '&nbsp;' }}</span>
         </span>
+      {% endif %}
+      {% if show_discount_badge and discount_percentage > 0 %}
+        <span class="shopco-price__badge">-{{ discount_percentage }}%</span>
       {% endif %}
     </div>
   {% endif %}

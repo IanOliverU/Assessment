@@ -3,15 +3,29 @@
 {% liquid
   assign block_settings = block.settings
   assign product = closest.product
-  assign rating = product.metafields.reviews.rating.value.rating
-  assign scale_max = product.metafields.reviews.rating.value.scale_max
-  assign rating_count = product.metafields.reviews.rating_count
 
   if request.visual_preview_mode and product == blank
     assign product = collections.all.products.first
-    assign rating = product.metafields.reviews.rating.value | default: 4
-    assign scale_max = product.metafields.reviews.rating.value.scale_max | default: 5
-    assign rating_count = product.metafields.reviews.rating_count | default: 3
+  endif
+
+  assign rating_metafield = product.metafields.reviews.rating.value
+  assign rating = rating_metafield.rating | default: rating_metafield
+  assign scale_max = rating_metafield.scale_max | default: 5
+  assign rating_count = product.metafields.reviews.rating_count
+
+  if rating == blank and product.metafields.custom.rating.value != blank
+    assign rating_metafield = product.metafields.custom.rating.value
+    assign rating = rating_metafield.rating | default: rating_metafield
+    assign scale_max = rating_metafield.scale_max | default: 5
+  endif
+
+  if rating == blank and request.visual_preview_mode
+    assign rating = block_settings.fallback_rating | default: 4
+    assign scale_max = 5
+    assign rating_count = 3
+  elsif rating == blank and block_settings.show_fallback_rating
+    assign rating = block_settings.fallback_rating
+    assign scale_max = 5
   endif
 -%}
 
@@ -48,7 +62,7 @@
       <defs>
         <linearGradient id="half" x1="0" x2="100%" y1="0" y2="0">
           <stop offset="50%" stop-color="var(--star-fill-color)"></stop>
-          <stop offset="50%" stop-color="{% if block_settings.stars_style == "outline" %}transparent{% else %}rgb(var(--star-fill-color-rgb) / var(--opacity-20){% endif %}"></stop>
+          <stop offset="50%" stop-color="{% if block_settings.stars_style == "outline" %}transparent{% else %}rgb(var(--star-fill-color-rgb) / var(--opacity-20)){% endif %}"></stop>
         </linearGradient>
 
         <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" id="star">
@@ -86,6 +100,12 @@
         {%- endfor -%}
       {% endif %}
     </div>
+
+    {%- if block_settings.show_rating_value -%}
+      <p class="rating-value {{ block_settings.type_preset }}" aria-hidden="true">
+        {{- rating | round: 1 }}/{{ scale_max -}}
+      </p>
+    {%- endif -%}
 
     {%- if block_settings.show_number or block_settings.stars_style == 'single' -%}
       <p class="rating-count {{ block_settings.type_preset }}">
@@ -137,7 +157,8 @@
   }
 
   .rating-wrapper .rating-count,
-  .rating-wrapper .rating-count-separator {
+  .rating-wrapper .rating-count-separator,
+  .rating-wrapper .rating-value {
     color: var(--star-fill-color);
     margin: 0;
     white-space: nowrap;
@@ -197,6 +218,28 @@
       "id": "show_number",
       "label": "t:settings.review_count",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating_value",
+      "label": "Show rating value",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_fallback_rating",
+      "label": "Show fallback rating without review data",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "fallback_rating",
+      "label": "Fallback rating",
+      "min": 1,
+      "max": 5,
+      "step": 0.1,
+      "default": 4.5,
+      "visible_if": "{{ block.settings.show_fallback_rating }}"
     },
     {
       "type": "select",
