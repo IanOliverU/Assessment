@@ -11,141 +11,70 @@
   "type": "footer",
   "name": "Footer",
   "sections": {
-    "footer_m9NzUG": {
-      "type": "footer",
+    "custom_footer_xaEApa": {
+      "type": "custom-footer",
       "blocks": {
-        "group_H6VpwJ": {
-          "type": "group",
+        "menu_column_GCiLwh": {
+          "type": "menu_column",
           "settings": {
-            "content_direction": "column",
-            "vertical_on_mobile": true,
-            "horizontal_alignment": "flex-start",
-            "vertical_alignment": "center",
-            "align_baseline": false,
-            "horizontal_alignment_flex_direction_column": "flex-start",
-            "vertical_alignment_flex_direction_column": "center",
-            "gap": 6,
-            "width": "fill",
-            "custom_width": 100,
-            "width_mobile": "fill",
-            "custom_width_mobile": 100,
-            "height": "fit",
-            "custom_height": 100,
-            "inherit_color_scheme": true,
-            "color_scheme": "",
-            "background_media": "none",
-            "video_position": "cover",
-            "background_image_position": "cover",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "toggle_overlay": false,
-            "overlay_color": "#00000026",
-            "overlay_style": "solid",
-            "gradient_direction": "to top",
-            "link": "",
-            "open_in_new_tab": false,
-            "placeholder": "",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {
-            "text_LWt8Pz": {
-              "type": "text",
-              "settings": {
-                "text": "<h2>Join our email list</h2>",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "h4",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "color": "var(--color-foreground)",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "text_f9CFLH": {
-              "type": "text",
-              "settings": {
-                "text": "<p>Get exclusive deals and early access to new products.</p>",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "rte",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "color": "var(--color-foreground)",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "text_LWt8Pz",
-            "text_f9CFLH"
-          ]
+            "column_heading": "COMPANY",
+            "menu": ""
+          }
         },
-        "email_signup_crihX7": {
-          "type": "email-signup",
+        "menu_column_UNyPmt": {
+          "type": "menu_column",
           "settings": {
-            "width": "fill",
-            "custom_width": 100,
-            "inherit_color_scheme": true,
-            "heading": "",
-            "heading_preset": "h3",
-            "color_scheme": "",
-            "border_style": "all",
-            "border_width": 1,
-            "border_radius": 100,
-            "input_type_preset": "paragraph",
-            "style_class": "button-unstyled",
-            "display_type": "arrow",
-            "label": "Sign up",
-            "integrated_button": true,
-            "button_type_preset": "paragraph",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
+            "column_heading": "HELP",
+            "menu": ""
+          }
+        },
+        "menu_column_Gr9q8U": {
+          "type": "menu_column",
+          "settings": {
+            "column_heading": "FAQ",
+            "menu": ""
+          }
+        },
+        "menu_column_4x44nG": {
+          "type": "menu_column",
+          "settings": {
+            "column_heading": "RESOURCES",
+            "menu": ""
+          }
         }
       },
       "block_order": [
-        "group_H6VpwJ",
-        "email_signup_crihX7"
+        "menu_column_GCiLwh",
+        "menu_column_UNyPmt",
+        "menu_column_Gr9q8U",
+        "menu_column_4x44nG"
       ],
-      "name": "t:names.footer",
+      "name": "Custom footer",
       "settings": {
-        "section_width": "page-width",
-        "gap": 20,
-        "color_scheme": "scheme-1",
-        "padding-block-start": 30,
-        "padding-block-end": 30
+        "show_newsletter": true,
+        "newsletter_heading": "STAY UPTO DATE ABOUT\nOUR LATEST OFFERS",
+        "newsletter_heading_font_size": 32,
+        "email_placeholder": "Enter your email address",
+        "button_label": "Subscribe to Newsletter",
+        "logo_text": "SHOP.CO",
+        "footer_description": "We have clothes that suits your style and which you're proud to wear. From women to men.",
+        "twitter_url": "",
+        "facebook_url": "",
+        "instagram_url": "",
+        "pinterest_url": "",
+        "github_url": "",
+        "footer_background_color": "#f0f0f0",
+        "newsletter_background_color": "#000000",
+        "newsletter_text_color": "#ffffff",
+        "footer_text_color": "#000000",
+        "muted_text_color": "#666666",
+        "container_max_width": 1240,
+        "footer_padding_top": 64,
+        "footer_padding_bottom": 48,
+        "newsletter_overlap_amount": 48,
+        "column_gap": 48,
+        "copyright_text": "Shop.co © 2026, All Rights Reserved",
+        "show_payment_icons": true
       }
     },
     "footer_utilities_jLGE8U": {
@@ -205,7 +134,7 @@
     }
   },
   "order": [
-    "footer_m9NzUG",
+    "custom_footer_xaEApa",
     "footer_utilities_jLGE8U"
   ]
 }

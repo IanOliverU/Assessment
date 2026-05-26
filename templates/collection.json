@@ -6,7 +6,8 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+{
   "sections": {
     "section": {
       "type": "section",
@@ -20,6 +21,7 @@
             "max_width": "normal",
             "alignment": "left",
             "type_preset": "h2",
+            "type_preset_mobile": "",
             "font": "var(--font-primary--family)",
             "font_size": "",
             "line_height": "normal",
@@ -46,6 +48,7 @@
             "max_width": "normal",
             "alignment": "left",
             "type_preset": "rte",
+            "type_preset_mobile": "",
             "font": "var(--font-primary--family)",
             "font_size": "",
             "line_height": "normal",
@@ -105,7 +108,7 @@
           "static": true,
           "settings": {
             "enable_filtering": true,
-            "filter_style": "horizontal",
+            "filter_style": "vertical",
             "filter_width": "centered",
             "text_label_case": "default",
             "show_swatch_label": false,
@@ -184,6 +187,7 @@
               "type": "price",
               "settings": {
                 "show_sale_price_first": true,
+                "show_discount_badge": false,
                 "show_installments": false,
                 "show_tax_info": false,
                 "type_preset": "h6",
@@ -214,6 +218,8 @@
         "layout_type": "grid",
         "product_card_size": "medium",
         "mobile_product_card_size": "small",
+        "enable_infinite_scroll": true,
+        "products_per_page": 24,
         "product_grid_width": "centered",
         "full_width_on_mobile": true,
         "columns_gap_horizontal": 16,
@@ -222,7 +228,7 @@
         "padding-inline-end": 0,
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
-        "padding-block-end": 32
+        "padding-block-end": 58
       }
     }
   },

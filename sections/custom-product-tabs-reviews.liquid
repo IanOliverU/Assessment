@@ -1,0 +1,1146 @@
+{% liquid
+  assign section_settings = section.settings
+  assign default_tab = section_settings.default_active_tab | default: 'reviews'
+  assign section_prefix = 'custom-product-tabs'
+  assign tablist_id = section_prefix | append: '-tablist-' | append: section.id
+
+  assign product_details_content = blank
+  if product.description != blank
+    assign product_details_content = product.description
+  elsif section_settings.product_details_fallback != blank
+    assign product_details_content = section_settings.product_details_fallback
+  endif
+
+  assign review_blocks = section.blocks | where: 'type', 'review'
+  assign faq_blocks = section.blocks | where: 'type', 'faq'
+%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --cpt-background: {{ section_settings.background_color }};
+    --cpt-text: {{ section_settings.text_color }};
+    --cpt-muted: {{ section_settings.muted_text_color }};
+    --cpt-border: {{ section_settings.border_color }};
+    --cpt-star: {{ section_settings.star_color }};
+    --cpt-verified: {{ section_settings.verified_icon_color }};
+    --cpt-button-bg: {{ section_settings.button_background }};
+    --cpt-button-text: {{ section_settings.button_text_color }};
+    --cpt-container-width: {{ section_settings.container_max_width }}px;
+    --cpt-padding-top: {{ section_settings.padding_top }}px;
+    --cpt-padding-bottom: {{ section_settings.padding_bottom }}px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }} {
+    background: var(--cpt-background);
+    color: var(--cpt-text);
+    padding-block: var(--cpt-padding-top) var(--cpt-padding-bottom);
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__inner {
+    max-width: var(--cpt-container-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin, 20px);
+  }
+
+  /* Tab navigation */
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__tablist {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid var(--cpt-border);
+    list-style: none;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__tab {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--cpt-muted);
+    font-family: inherit;
+    font-size: clamp(14px, 2.8vw, 16px);
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: center;
+    cursor: pointer;
+    padding-block: 14px 16px;
+    transition: color 160ms ease;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__tab:hover {
+    color: var(--cpt-text);
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__tab:focus-visible {
+    outline: 2px solid var(--cpt-text);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__tab[aria-selected='true'] {
+    color: var(--cpt-text);
+    font-weight: 700;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__tab[aria-selected='true']::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--cpt-text);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Panels */
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__panel {
+    padding-block-start: 28px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__panel[hidden] {
+    display: none;
+  }
+
+  /* Product details */
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__details-content {
+    max-width: 72ch;
+    color: var(--cpt-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__details-content :is(h1, h2, h3, h4, h5, h6) {
+    color: var(--cpt-text);
+    margin-block: 1.25em 0.5em;
+    line-height: 1.3;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__details-content :is(p, ul, ol) {
+    margin-block: 0 1em;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__details-content ul,
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__details-content ol {
+    padding-inline-start: 1.25em;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__details-empty {
+    max-width: 52ch;
+    padding: 24px;
+    border: 1px dashed var(--cpt-border);
+    border-radius: 12px;
+    color: var(--cpt-muted);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  /* Reviews header */
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviews-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-block-end: 24px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviews-heading {
+    margin: 0;
+    color: var(--cpt-text);
+    font-size: clamp(18px, 4vw, 22px);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviews-count {
+    color: var(--cpt-muted);
+    font-weight: 500;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviews-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--cpt-border);
+    border-radius: 50%;
+    background: #f5f5f5;
+    color: var(--cpt-text);
+    cursor: pointer;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__icon-btn:focus-visible {
+    outline: 2px solid var(--cpt-text);
+    outline-offset: 3px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__icon-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--cpt-border);
+    border-radius: 999px;
+    background: #f5f5f5;
+    color: var(--cpt-text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__sort svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--cpt-button-bg);
+    color: var(--cpt-button-text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__btn-primary:hover {
+    opacity: 0.92;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__btn-primary:focus-visible {
+    outline: 2px solid var(--cpt-text);
+    outline-offset: 3px;
+  }
+
+  /* Review grid */
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviews-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__review-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: 22px 24px 20px;
+    border: 1px solid var(--cpt-border);
+    border-radius: 14px;
+    background: #ffffff;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__review-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: rgb(0 0 0 / 0.14);
+    line-height: 1;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__star {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__star--active {
+    color: var(--cpt-star);
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__star svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin: -4px -4px 0 0;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--cpt-muted);
+    cursor: pointer;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__menu-btn:focus-visible {
+    outline: 2px solid var(--cpt-text);
+    outline-offset: 2px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__menu-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviewer-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-block-start: 14px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviewer-name {
+    color: var(--cpt-text);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__verified {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--cpt-verified);
+    color: #ffffff;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__verified svg {
+    display: block;
+    width: 12px;
+    height: 12px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__review-text {
+    margin: 12px 0 0;
+    color: var(--cpt-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__review-date {
+    margin-block-start: auto;
+    padding-block-start: 16px;
+    color: var(--cpt-muted);
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__reviews-empty {
+    padding: 24px;
+    border: 1px dashed var(--cpt-border);
+    border-radius: 14px;
+    color: var(--cpt-muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__load-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-block-start: 28px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 28px;
+    border: 1px solid var(--cpt-border);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--cpt-text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__btn-secondary:focus-visible {
+    outline: 2px solid var(--cpt-text);
+    outline-offset: 3px;
+  }
+
+  /* FAQ */
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-item {
+    border: 1px solid var(--cpt-border);
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-details {
+    margin: 0;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+    color: var(--cpt-text);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-summary::after {
+    content: '+';
+    flex-shrink: 0;
+    color: var(--cpt-muted);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-details[open] .{{ section_prefix }}__faq-summary::after {
+    content: '−';
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-summary:focus-visible {
+    outline: 2px solid var(--cpt-text);
+    outline-offset: -2px;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-answer {
+    padding: 0 20px 18px;
+    color: var(--cpt-muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  #shopify-section-{{ section.id }} .{{ section_prefix }}__faq-empty {
+    padding: 24px;
+    border: 1px dashed var(--cpt-border);
+    border-radius: 12px;
+    color: var(--cpt-muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  @media screen and (min-width: 750px) {
+    #shopify-section-{{ section.id }} .{{ section_prefix }}__tab {
+      font-size: 17px;
+      padding-block: 18px 20px;
+    }
+
+    #shopify-section-{{ section.id }} .{{ section_prefix }}__panel {
+      padding-block-start: 36px;
+    }
+
+    #shopify-section-{{ section.id }} .{{ section_prefix }}__reviews-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    #shopify-section-{{ section.id }} .{{ section_prefix }}__review-card {
+      padding: 24px 26px 22px;
+      border-radius: 16px;
+    }
+
+    #shopify-section-{{ section.id }} .{{ section_prefix }}__review-text {
+      font-size: 15px;
+    }
+  }
+{% endstyle %}
+
+<section
+  class="{{ section_prefix }}"
+  data-custom-product-tabs="{{ section.id }}"
+>
+  <div class="{{ section_prefix }}__inner">
+    <div
+      class="{{ section_prefix }}__tablist"
+      role="tablist"
+      aria-label="Product information"
+      id="{{ tablist_id }}"
+    >
+      <button
+        type="button"
+        role="tab"
+        class="{{ section_prefix }}__tab"
+        id="{{ section_prefix }}-tab-details-{{ section.id }}"
+        aria-controls="{{ section_prefix }}-panel-details-{{ section.id }}"
+        aria-selected="{% if default_tab == 'product_details' %}true{% else %}false{% endif %}"
+        tabindex="{% if default_tab == 'product_details' %}0{% else %}-1{% endif %}"
+        data-tab="product_details"
+      >
+        Product Details
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="{{ section_prefix }}__tab"
+        id="{{ section_prefix }}-tab-reviews-{{ section.id }}"
+        aria-controls="{{ section_prefix }}-panel-reviews-{{ section.id }}"
+        aria-selected="{% if default_tab == 'reviews' %}true{% else %}false{% endif %}"
+        tabindex="{% if default_tab == 'reviews' %}0{% else %}-1{% endif %}"
+        data-tab="reviews"
+      >
+        Rating &amp; Reviews
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="{{ section_prefix }}__tab"
+        id="{{ section_prefix }}-tab-faqs-{{ section.id }}"
+        aria-controls="{{ section_prefix }}-panel-faqs-{{ section.id }}"
+        aria-selected="{% if default_tab == 'faqs' %}true{% else %}false{% endif %}"
+        tabindex="{% if default_tab == 'faqs' %}0{% else %}-1{% endif %}"
+        data-tab="faqs"
+      >
+        FAQs
+      </button>
+    </div>
+
+    {%- comment -%} Product Details panel {%- endcomment -%}
+    <div
+      class="{{ section_prefix }}__panel"
+      role="tabpanel"
+      id="{{ section_prefix }}-panel-details-{{ section.id }}"
+      aria-labelledby="{{ section_prefix }}-tab-details-{{ section.id }}"
+      data-panel="product_details"
+      {% unless default_tab == 'product_details' %}hidden{% endunless %}
+    >
+      {% if product_details_content != blank %}
+        <div class="{{ section_prefix }}__details-content rte">
+          {{ product_details_content }}
+        </div>
+      {% else %}
+        <div class="{{ section_prefix }}__details-empty">
+          Add a product description or use the “Product details fallback text” setting in this section to display product details here.
+        </div>
+      {% endif %}
+    </div>
+
+    {%- comment -%} Rating & Reviews panel {%- endcomment -%}
+    <div
+      class="{{ section_prefix }}__panel"
+      role="tabpanel"
+      id="{{ section_prefix }}-panel-reviews-{{ section.id }}"
+      aria-labelledby="{{ section_prefix }}-tab-reviews-{{ section.id }}"
+      data-panel="reviews"
+      {% unless default_tab == 'reviews' %}hidden{% endunless %}
+    >
+      <div class="{{ section_prefix }}__reviews-header">
+        <h2 class="{{ section_prefix }}__reviews-heading">
+          {{ section_settings.reviews_heading | escape }}
+          {% if section_settings.review_count_text != blank %}
+            <span class="{{ section_prefix }}__reviews-count">({{ section_settings.review_count_text | escape }})</span>
+          {% endif %}
+        </h2>
+
+        <div class="{{ section_prefix }}__reviews-controls">
+          {% if section_settings.show_filter_button %}
+            <button
+              type="button"
+              class="{{ section_prefix }}__icon-btn"
+              aria-label="Filter reviews"
+              data-visual-only
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <path d="M3 5h14l-5.2 6.1v4.4l-3.6-1.8V11.1L3 5Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          {% endif %}
+
+          {% if section_settings.show_sort_dropdown %}
+            <span class="{{ section_prefix }}__sort" aria-hidden="true">
+              Latest
+              <svg viewBox="0 0 16 16" focusable="false">
+                <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          {% endif %}
+
+          {% if section_settings.show_write_review_button %}
+            {% if section_settings.write_review_url != blank %}
+              <a
+                href="{{ section_settings.write_review_url }}"
+                class="{{ section_prefix }}__btn-primary"
+                {% if section_settings.write_review_open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+              >
+                {{ section_settings.write_review_button_label | escape }}
+              </a>
+            {% else %}
+              <button type="button" class="{{ section_prefix }}__btn-primary" data-visual-only>
+                {{ section_settings.write_review_button_label | escape }}
+              </button>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      {% if review_blocks.size > 0 %}
+        <ul class="{{ section_prefix }}__reviews-grid">
+          {% for block in review_blocks %}
+            {% liquid
+              assign reviewer_name = block.settings.reviewer_name | default: 'Customer'
+              assign rating = block.settings.star_rating | times: 1
+              assign review_text = block.settings.review_text
+              assign posted_date = block.settings.posted_date
+              assign is_verified = block.settings.verified
+            %}
+
+            <li {{ block.shopify_attributes }}>
+              <article
+                class="{{ section_prefix }}__review-card"
+                aria-label="{{ reviewer_name | escape }} review, {{ rating }} out of 5 stars"
+              >
+                <div class="{{ section_prefix }}__review-top">
+                  <div class="{{ section_prefix }}__stars" aria-hidden="true">
+                    {% for star_index in (1..5) %}
+                      <span class="{{ section_prefix }}__star{% if star_index <= rating %} {{ section_prefix }}__star--active{% endif %}">
+                        <svg viewBox="0 0 20 20" focusable="false">
+                          <path d="m10 1.5 2.6 5.3 5.8.8-4.2 4.1 1 5.8L10 14.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L10 1.5Z"/>
+                        </svg>
+                      </span>
+                    {% endfor %}
+                  </div>
+
+                  <button
+                    type="button"
+                    class="{{ section_prefix }}__menu-btn"
+                    aria-label="Review options for {{ reviewer_name | escape }}"
+                    data-visual-only
+                  >
+                    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                      <circle cx="4" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="16" cy="10" r="1.5" fill="currentColor"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="{{ section_prefix }}__reviewer-row">
+                  <span class="{{ section_prefix }}__reviewer-name">{{ reviewer_name | escape }}</span>
+                  {% if is_verified %}
+                    <span class="{{ section_prefix }}__verified" aria-label="Verified buyer">
+                      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                        <path d="M6.4 11.6 2.9 8.1l1.3-1.3 2.2 2.2 5.4-5.4 1.3 1.3-6.7 6.7Z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                  {% endif %}
+                </div>
+
+                {% if review_text != blank %}
+                  <p class="{{ section_prefix }}__review-text">{{ review_text | escape }}</p>
+                {% endif %}
+
+                {% if posted_date != blank %}
+                  <p class="{{ section_prefix }}__review-date">Posted on {{ posted_date | escape }}</p>
+                {% endif %}
+              </article>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="{{ section_prefix }}__load-more-wrap">
+          <button
+            type="button"
+            class="{{ section_prefix }}__btn-secondary"
+            data-visual-only
+            aria-label="{{ section_settings.load_more_button_label | escape }}"
+          >
+            {{ section_settings.load_more_button_label | escape }}
+          </button>
+        </div>
+      {% else %}
+        <div class="{{ section_prefix }}__reviews-empty">
+          Add review blocks in the theme editor to display customer reviews here.
+        </div>
+      {% endif %}
+    </div>
+
+    {%- comment -%} FAQs panel {%- endcomment -%}
+    <div
+      class="{{ section_prefix }}__panel"
+      role="tabpanel"
+      id="{{ section_prefix }}-panel-faqs-{{ section.id }}"
+      aria-labelledby="{{ section_prefix }}-tab-faqs-{{ section.id }}"
+      data-panel="faqs"
+      {% unless default_tab == 'faqs' %}hidden{% endunless %}
+    >
+      {% if faq_blocks.size > 0 %}
+        <ul class="{{ section_prefix }}__faq-list">
+          {% for block in faq_blocks %}
+            {% liquid
+              assign faq_question = block.settings.question
+              assign faq_answer = block.settings.answer
+            %}
+
+            <li class="{{ section_prefix }}__faq-item" {{ block.shopify_attributes }}>
+              <details class="{{ section_prefix }}__faq-details"{% if forloop.first %} open{% endif %}>
+                <summary class="{{ section_prefix }}__faq-summary">
+                  {{ faq_question | escape }}
+                </summary>
+                {% if faq_answer != blank %}
+                  <div class="{{ section_prefix }}__faq-answer rte">
+                    {{ faq_answer }}
+                  </div>
+                {% endif %}
+              </details>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="{{ section_prefix }}__faq-empty">
+          Add FAQ blocks in the theme editor to display frequently asked questions here.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const sectionRoot = document.querySelector('[data-custom-product-tabs="{{ section.id }}"]');
+    if (!sectionRoot) return;
+
+    const tabs = Array.from(sectionRoot.querySelectorAll('[role="tab"]'));
+    const panels = Array.from(sectionRoot.querySelectorAll('[role="tabpanel"]'));
+    const tablist = sectionRoot.querySelector('[role="tablist"]');
+
+    function activateTab(tab) {
+      const target = tab.getAttribute('data-tab');
+      if (!target) return;
+
+      tabs.forEach(function (item) {
+        const isSelected = item === tab;
+        item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        item.tabIndex = isSelected ? 0 : -1;
+      });
+
+      panels.forEach(function (panel) {
+        const isActive = panel.getAttribute('data-panel') === target;
+        panel.hidden = !isActive;
+      });
+
+      tab.focus();
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        activateTab(tab);
+      });
+
+      tab.addEventListener('keydown', function (event) {
+        const currentIndex = tabs.indexOf(tab);
+        let nextIndex = null;
+
+        if (event.key === 'ArrowRight') {
+          nextIndex = (currentIndex + 1) % tabs.length;
+        } else if (event.key === 'ArrowLeft') {
+          nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        } else if (event.key === 'Home') {
+          nextIndex = 0;
+        } else if (event.key === 'End') {
+          nextIndex = tabs.length - 1;
+        }
+
+        if (nextIndex === null) return;
+        event.preventDefault();
+        activateTab(tabs[nextIndex]);
+      });
+    });
+
+    if (tablist) {
+      tablist.addEventListener('keydown', function (event) {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const activeTab = tabs.find(function (tab) {
+          return tab.getAttribute('aria-selected') === 'true';
+        });
+        if (activeTab && document.activeElement === tablist) {
+          event.preventDefault();
+          activateTab(activeTab);
+        }
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product tabs & reviews",
+  "tag": "section",
+  "class": "custom-product-tabs-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "default_active_tab",
+      "label": "Default active tab",
+      "options": [
+        { "value": "product_details", "label": "Product Details" },
+        { "value": "reviews", "label": "Rating & Reviews" },
+        { "value": "faqs", "label": "FAQs" }
+      ],
+      "default": "reviews"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Section padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Section padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "container_max_width",
+      "label": "Container max width",
+      "min": 900,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1240
+    },
+    {
+      "type": "header",
+      "content": "Product details"
+    },
+    {
+      "type": "richtext",
+      "id": "product_details_fallback",
+      "label": "Product details fallback text",
+      "default": "<p>Crafted for everyday wear with a clean silhouette and premium hand-feel. This piece is designed to layer easily, hold its shape after washing, and pair with both casual and elevated looks.</p><p><strong>Fabric:</strong> Soft cotton blend with breathable comfort.</p><p><strong>Fit:</strong> Relaxed through the body with a flattering drape.</p><p><strong>Care:</strong> Machine wash cold. Tumble dry low.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Reviews tab"
+    },
+    {
+      "type": "text",
+      "id": "reviews_heading",
+      "label": "Reviews heading",
+      "default": "All Reviews"
+    },
+    {
+      "type": "text",
+      "id": "review_count_text",
+      "label": "Review count text",
+      "default": "451",
+      "info": "Displayed in parentheses next to the heading."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter_button",
+      "label": "Show filter button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort_dropdown",
+      "label": "Show sort dropdown",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_write_review_button",
+      "label": "Show write review button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "write_review_button_label",
+      "label": "Write review button label",
+      "default": "Write a Review"
+    },
+    {
+      "type": "url",
+      "id": "write_review_url",
+      "label": "Write review button link",
+      "info": "Optional. Leave blank for a visual-only button."
+    },
+    {
+      "type": "checkbox",
+      "id": "write_review_open_new_tab",
+      "label": "Open write review link in new tab",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "load_more_button_label",
+      "label": "Load more button label",
+      "default": "Load More Reviews"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "muted_text_color",
+      "label": "Muted text color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#E6E6E6"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#FFC107"
+    },
+    {
+      "type": "color",
+      "id": "verified_icon_color",
+      "label": "Verified icon color",
+      "default": "#01AB31"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "text",
+          "id": "reviewer_name",
+          "label": "Reviewer name",
+          "default": "Customer"
+        },
+        {
+          "type": "range",
+          "id": "star_rating",
+          "label": "Star rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verified buyer",
+          "default": true
+        },
+        {
+          "type": "textarea",
+          "id": "review_text",
+          "label": "Review text",
+          "default": "Beautiful quality and a comfortable fit. The fabric feels premium and the design looks even better in person."
+        },
+        {
+          "type": "text",
+          "id": "posted_date",
+          "label": "Posted date",
+          "default": "August 14, 2023"
+        }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "What is the fabric made of?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>Our pieces use a soft cotton blend selected for breathability, durability, and a premium hand-feel that holds up wash after wash.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product tabs & reviews",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Samantha D.",
+            "star_rating": 5,
+            "verified": true,
+            "review_text": "I absolutely love this piece. The design is unique, the fabric feels soft and breathable, and it keeps its shape after washing. Perfect for everyday wear.",
+            "posted_date": "August 14, 2023"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Alex M.",
+            "star_rating": 5,
+            "verified": true,
+            "review_text": "Great quality for the price. The fit is flattering without being tight, and the material has a nice weight that looks elevated.",
+            "posted_date": "August 12, 2023"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Ethan R.",
+            "star_rating": 5,
+            "verified": true,
+            "review_text": "Exactly what I wanted for weekend outfits. Comfortable, easy to style, and the stitching feels solid. Would buy again.",
+            "posted_date": "August 10, 2023"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Olivia P.",
+            "star_rating": 5,
+            "verified": true,
+            "review_text": "The color is true to the photos and the fabric drapes beautifully. I paired it with denim and sneakers and got compliments all day.",
+            "posted_date": "August 8, 2023"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Liam K.",
+            "star_rating": 5,
+            "verified": true,
+            "review_text": "Clean design, premium feel, and true to size. Shipping was quick and the packaging felt thoughtful. Highly recommend.",
+            "posted_date": "August 5, 2023"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Ava H.",
+            "star_rating": 5,
+            "verified": true,
+            "review_text": "Soft, breathable, and easy to dress up or down. This has quickly become one of my favorite wardrobe staples.",
+            "posted_date": "August 2, 2023"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "What is the fabric made of?",
+            "answer": "<p>Our apparel uses a soft cotton blend chosen for breathability, comfort, and long-lasting wear. Fabric content may vary slightly by style and is listed on each product page.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "How does the sizing fit?",
+            "answer": "<p>Most customers find our fit true to size with a relaxed, modern silhouette. If you are between sizes or prefer a looser look, we recommend sizing up.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Can I return or exchange this item?",
+            "answer": "<p>Yes. Unworn items in original condition can be returned or exchanged within 30 days of delivery. Please see our returns policy for full details.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "templates": ["product"]
+  }
+}
+{% endschema %}
