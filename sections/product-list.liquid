@@ -4,6 +4,110 @@
   assign max_items = section.settings.max_products
 %}
 
+{% if section.settings.shopco_style %}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div
+    data-testid="product-list"
+    class="
+      section
+      section--{{ section.settings.section_width }}
+      color-{{ section.settings.color_scheme }}
+      shopco-featured
+      spacing-style
+    "
+    style="
+      --shopco-card-background: {{ section.settings.shopco_card_background }};
+      --shopco-card-radius: {{ section.settings.shopco_card_radius }}px;
+      --shopco-columns: {{ section.settings.columns }};
+      --shopco-column-gap: {{ section.settings.columns_gap }}px;
+      {% render 'spacing-style', settings: section.settings %}
+    "
+  >
+    <h2 class="shopco-featured__heading">{{ section.settings.shopco_heading | escape }}</h2>
+
+    <div class="shopco-featured__products" role="list">
+      {% if section.settings.collection != blank %}
+        {% paginate section.settings.collection.products by max_items %}
+          {% for product in section.settings.collection.products limit: max_items %}
+            {% liquid
+              assign rating_value = section.settings.shopco_fallback_rating
+              assign rating_scale_max = 5
+
+              if product.metafields.reviews.rating.value != blank
+                assign rating_value = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value
+                assign rating_scale_max = product.metafields.reviews.rating.value.scale_max | default: 5
+              elsif product.metafields.custom.rating.value != blank
+                assign rating_value = product.metafields.custom.rating.value.rating | default: product.metafields.custom.rating.value
+                assign rating_scale_max = product.metafields.custom.rating.value.scale_max | default: 5
+              endif
+
+              assign star_percentage = rating_value | times: 100 | divided_by: rating_scale_max
+              assign current_price = product.price
+              assign compare_price = product.compare_at_price
+              assign discounted = false
+
+              if compare_price > current_price
+                assign discounted = true
+                assign discount_percentage = compare_price | minus: current_price | times: 100 | divided_by: compare_price | round
+              endif
+            %}
+
+            <article class="shopco-product-card" role="listitem">
+              <a class="shopco-product-card__media" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+                {% if product.featured_image != blank %}
+                  {{
+                    product.featured_image
+                    | image_url: width: 720
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '180, 260, 360, 480, 600, 720',
+                      sizes: '(min-width: 750px) calc((100vw - 160px) / 4), calc(50vw - 26px)',
+                      class: 'shopco-product-card__image',
+                      alt: product.featured_image.alt
+                  }}
+                {% else %}
+                  {{ 'product-apparel-1' | placeholder_svg_tag: 'shopco-product-card__placeholder' }}
+                {% endif %}
+              </a>
+
+              <h3 class="shopco-product-card__title">
+                <a href="{{ product.url }}">{{ product.title | escape }}</a>
+              </h3>
+
+              {% if section.settings.shopco_show_ratings %}
+                <div class="shopco-product-card__rating" aria-label="{{ rating_value }} out of {{ rating_scale_max }} stars">
+                  <span
+                    class="shopco-product-card__stars"
+                    style="--rating-percent: {{ star_percentage }}%;"
+                    aria-hidden="true"
+                  >
+                    <span class="shopco-product-card__stars-base">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    <span class="shopco-product-card__stars-fill">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                  </span>
+                  <span class="shopco-product-card__rating-number">{{ rating_value | round: 1 }}/{{ rating_scale_max }}</span>
+                </div>
+              {% endif %}
+
+              <div class="shopco-product-card__price">
+                <span class="shopco-product-card__current-price">{{ current_price | money_without_trailing_zeros }}</span>
+                {% if discounted %}
+                  <s class="shopco-product-card__compare-price">{{ compare_price | money_without_trailing_zeros }}</s>
+                  <span class="shopco-product-card__badge">-{{ discount_percentage }}%</span>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        {% endpaginate %}
+      {% endif %}
+    </div>
+
+    {% if section.settings.collection != blank %}
+      <a class="shopco-featured__view-all" href="{{ section.settings.collection.url }}">
+        {{ section.settings.shopco_view_all_label | escape }}
+      </a>
+    {% endif %}
+  </div>
+{% else %}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
   data-testid="product-list"
@@ -79,6 +183,218 @@
     {%- content_for 'blocks' -%}
   </div>
 </div>
+{% endif %}
+
+{% stylesheet %}
+  .shopco-featured {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(26px, 3.2vw, 40px);
+  }
+
+  .shopco-featured__heading {
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-heading--family);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+  }
+
+  .shopco-featured__products {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(var(--shopco-columns), minmax(0, 1fr));
+    gap: clamp(var(--shopco-column-gap), 1.1vw, 20px);
+  }
+
+  .shopco-product-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .shopco-product-card__media {
+    display: flex;
+    width: 100%;
+    aspect-ratio: 1;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: var(--shopco-card-radius);
+    background: var(--shopco-card-background);
+    text-decoration: none;
+  }
+
+  .shopco-product-card__image,
+  .shopco-product-card__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .shopco-product-card__title {
+    margin: 14px 0 0;
+    font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .shopco-product-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .shopco-product-card__rating {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  .shopco-product-card__stars {
+    position: relative;
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .shopco-product-card__stars-base {
+    color: #dadada;
+  }
+
+  .shopco-product-card__stars-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--rating-percent);
+    overflow: hidden;
+    color: #ffc633;
+    white-space: nowrap;
+  }
+
+  .shopco-product-card__rating-number {
+    color: #00000099;
+  }
+
+  .shopco-product-card__price {
+    margin-top: 7px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+    line-height: 1.2;
+  }
+
+  .shopco-product-card__current-price {
+    font-weight: 700;
+  }
+
+  .shopco-product-card__compare-price {
+    color: #00000066;
+    font-weight: 700;
+  }
+
+  .shopco-product-card__badge {
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: #ff33331a;
+    color: #ff3333;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .shopco-featured__view-all {
+    min-width: 218px;
+    margin: 0 auto;
+    padding: 15px 44px;
+    border: 1px solid #0000001a;
+    border-radius: 999px;
+    color: inherit;
+    font-size: 0.9rem;
+    line-height: 1;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .shopco-featured__products {
+      width: min(100%, 1240px);
+      margin-inline: auto;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .shopco-featured {
+      --shopco-mobile-rail-spacing: 8px;
+      gap: 24px;
+    }
+
+    .shopco-featured__heading {
+      font-size: clamp(1.9rem, 8.6vw, 2.2rem);
+    }
+
+    .shopco-featured__products {
+      display: flex;
+      gap: 12px;
+      padding-inline: var(--shopco-mobile-rail-spacing);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-padding-inline: var(--shopco-mobile-rail-spacing);
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .shopco-featured__products::-webkit-scrollbar {
+      display: none;
+    }
+
+    .shopco-product-card {
+      flex: 0 0 calc((100% - (var(--shopco-mobile-rail-spacing) * 2) - 12px) / 2);
+      scroll-snap-align: start;
+    }
+
+    .shopco-product-card__title {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      line-height: 1.3;
+    }
+
+    .shopco-product-card__rating {
+      margin-top: 5px;
+      gap: 5px;
+      font-size: 0.64rem;
+    }
+
+    .shopco-product-card__stars {
+      font-size: 0.77rem;
+      letter-spacing: 0;
+    }
+
+    .shopco-product-card__price {
+      margin-top: 5px;
+      gap: 5px;
+      font-size: 1.05rem;
+    }
+
+    .shopco-product-card__badge {
+      padding: 4px 8px;
+      font-size: 0.58rem;
+    }
+
+    .shopco-featured__view-all {
+      width: 100%;
+      min-width: 0;
+      padding-block: 14px;
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -103,6 +419,61 @@
       "type": "collection",
       "id": "collection",
       "label": "t:settings.collection"
+    },
+    {
+      "type": "checkbox",
+      "id": "shopco_style",
+      "label": "Use SHOP.CO featured collection style",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "shopco_heading",
+      "label": "Featured heading",
+      "default": "NEW ARRIVALS",
+      "visible_if": "{{ section.settings.shopco_style == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "shopco_show_ratings",
+      "label": "Show ratings",
+      "default": true,
+      "visible_if": "{{ section.settings.shopco_style == true }}"
+    },
+    {
+      "type": "range",
+      "id": "shopco_fallback_rating",
+      "label": "Fallback rating",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "default": 4.5,
+      "visible_if": "{{ section.settings.shopco_style == true and section.settings.shopco_show_ratings == true }}"
+    },
+    {
+      "type": "color",
+      "id": "shopco_card_background",
+      "label": "Product image card color",
+      "default": "#f0eeee",
+      "visible_if": "{{ section.settings.shopco_style == true }}"
+    },
+    {
+      "type": "range",
+      "id": "shopco_card_radius",
+      "label": "Product image corner radius",
+      "min": 0,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.shopco_style == true }}"
+    },
+    {
+      "type": "text",
+      "id": "shopco_view_all_label",
+      "label": "View all button label",
+      "default": "View All",
+      "visible_if": "{{ section.settings.shopco_style == true }}"
     },
     {
       "type": "select",
