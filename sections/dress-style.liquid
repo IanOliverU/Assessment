@@ -1,0 +1,538 @@
+{% liquid
+  assign section_settings = section.settings
+  assign section_heading = section_settings.heading
+  assign section_heading_id = 'CustomDressStyleGridHeading-' | append: section.id
+%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --custom-dress-style-container-width: {{ section_settings.container_max_width }}px;
+    --custom-dress-style-padding-top: {{ section_settings.padding_top }}px;
+    --custom-dress-style-padding-bottom: {{ section_settings.padding_bottom }}px;
+    --custom-dress-style-card-height-desktop: {{ section_settings.card_height_desktop }}px;
+    --custom-dress-style-card-height-mobile: {{ section_settings.card_height_mobile }}px;
+    --custom-dress-style-gap: {{ section_settings.gap }}px;
+    --custom-dress-style-section-background: {{ section_settings.section_background_color }};
+    --custom-dress-style-card-background: {{ section_settings.card_background_color }};
+    --custom-dress-style-text-color: {{ section_settings.text_color }};
+    --custom-dress-style-container-radius: {{ section_settings.container_border_radius }}px;
+    --custom-dress-style-card-radius: {{ section_settings.card_border_radius }}px;
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-grid {
+    padding-block: var(--custom-dress-style-padding-top) var(--custom-dress-style-padding-bottom);
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-grid__container {
+    max-width: var(--custom-dress-style-container-width);
+    margin-inline: auto;
+    padding: 40px 24px 28px;
+    border-radius: var(--custom-dress-style-container-radius);
+    background: var(--custom-dress-style-section-background);
+    overflow: hidden;
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-grid__heading {
+    max-width: 11ch;
+    margin: 0 auto;
+    color: var(--custom-dress-style-text-color);
+    font-family: var(--font-h1--family, var(--font-heading--family));
+    font-style: var(--font-h1--style, normal);
+    font-weight: var(--font-h1--weight, 700);
+    font-size: clamp(32px, 8.8vw, 48px);
+    line-height: 1;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-grid__list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--custom-dress-style-gap);
+    margin: 28px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-grid__item {
+    min-width: 0;
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-card {
+    position: relative;
+    display: block;
+    min-height: var(--custom-dress-style-card-height-mobile);
+    height: var(--custom-dress-style-card-height-mobile);
+    overflow: hidden;
+    border-radius: var(--custom-dress-style-card-radius);
+    background: var(--custom-dress-style-card-background);
+    color: var(--custom-dress-style-text-color);
+    text-decoration: none;
+  }
+
+  #shopify-section-{{ section.id }} a.custom-dress-style-card {
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  #shopify-section-{{ section.id }} a.custom-dress-style-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 42px rgb(0 0 0 / 0.08);
+  }
+
+  #shopify-section-{{ section.id }} a.custom-dress-style-card:focus-visible {
+    outline: 2px solid var(--custom-dress-style-text-color);
+    outline-offset: 4px;
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-card__media,
+  #shopify-section-{{ section.id }} .custom-dress-style-card__image,
+  #shopify-section-{{ section.id }} .custom-dress-style-card__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-card__image,
+  #shopify-section-{{ section.id }} .custom-dress-style-card__placeholder {
+    object-fit: cover;
+    object-position: var(--custom-dress-style-image-position, center center);
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-card__placeholder {
+    background: rgb(0 0 0 / 0.035);
+    color: rgb(0 0 0 / 0.16);
+  }
+
+  #shopify-section-{{ section.id }} .custom-dress-style-card__title {
+    position: absolute;
+    z-index: 2;
+    top: 18px;
+    left: 22px;
+    max-width: calc(100% - 44px);
+    margin: 0;
+    color: var(--custom-dress-style-text-color);
+    font-family: var(--font-body--family);
+    font-size: clamp(20px, 5.4vw, 28px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    #shopify-section-{{ section.id }} .custom-dress-style-grid {
+      padding-inline: var(--page-margin, 20px);
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-grid__container {
+      padding: 64px 64px 72px;
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-grid__heading {
+      max-width: none;
+      font-size: clamp(40px, 4.2vw, 48px);
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-grid__list {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      margin-block-start: 56px;
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-grid__item--small {
+      grid-column: span 5;
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-grid__item--large {
+      grid-column: span 7;
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-card {
+      min-height: var(--custom-dress-style-card-height-desktop);
+      height: var(--custom-dress-style-card-height-desktop);
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-card__title {
+      top: 24px;
+      left: 36px;
+      max-width: calc(100% - 72px);
+      font-size: 28px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .custom-dress-style-grid {
+      padding-inline: 16px;
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-grid__container {
+      padding: 40px 24px 27px;
+    }
+
+    #shopify-section-{{ section.id }} .custom-dress-style-grid__list--compact {
+      gap: calc(var(--custom-dress-style-gap) * 0.7);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #shopify-section-{{ section.id }} a.custom-dress-style-card {
+      transition: none;
+    }
+
+    #shopify-section-{{ section.id }} a.custom-dress-style-card:hover {
+      transform: none;
+    }
+  }
+{% endstyle %}
+
+<section
+  class="custom-dress-style-grid"
+  {% if section_heading != blank %}
+    aria-labelledby="{{ section_heading_id }}"
+  {% endif %}
+>
+  <div class="custom-dress-style-grid__container">
+    {% if section_heading != blank %}
+      <h2 class="custom-dress-style-grid__heading" id="{{ section_heading_id }}">
+        {{ section_heading | escape }}
+      </h2>
+    {% endif %}
+
+    {% if section.blocks.size > 0 %}
+      <ul class="custom-dress-style-grid__list custom-dress-style-grid__list--{{ section_settings.mobile_card_layout }}">
+        {% for block in section.blocks %}
+          {% liquid
+            assign card_title = block.settings.title | default: 'Dress style'
+            assign card_image = block.settings.image
+            assign card_link = block.settings.link
+            assign card_width = block.settings.desktop_width
+            assign card_image_position = block.settings.image_position
+            assign card_image_sizes = '(min-width: 750px) 470px, calc(100vw - 80px)'
+            assign image_loading = 'lazy'
+            assign fetch_priority = 'auto'
+
+            if card_width == 'large'
+              assign card_image_sizes = '(min-width: 750px) 660px, calc(100vw - 80px)'
+            endif
+
+            if section.index == 1 and forloop.index <= 2
+              assign image_loading = 'eager'
+            endif
+
+            if section.index == 1 and forloop.first
+              assign fetch_priority = 'high'
+            endif
+          %}
+
+          <li
+            class="custom-dress-style-grid__item custom-dress-style-grid__item--{{ card_width }}"
+            {{ block.shopify_attributes }}
+          >
+            {% if card_link != blank %}
+              <a
+                href="{{ card_link }}"
+                class="custom-dress-style-card"
+                aria-label="{{ card_title | escape }}"
+                style="--custom-dress-style-image-position: {{ card_image_position }};"
+                {% if block.settings.open_link_new_tab %}
+                  target="_blank" rel="noopener noreferrer"
+                {% endif %}
+              >
+            {% else %}
+              <article
+                class="custom-dress-style-card"
+                style="--custom-dress-style-image-position: {{ card_image_position }};"
+              >
+            {% endif %}
+
+            <span class="custom-dress-style-card__media">
+              {% if card_image != blank %}
+                {{
+                  card_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    width: card_image.width,
+                    height: card_image.height,
+                    widths: '375, 550, 750, 950, 1200',
+                    sizes: card_image_sizes,
+                    alt: card_title,
+                    class: 'custom-dress-style-card__image',
+                    loading: image_loading,
+                    fetchpriority: fetch_priority
+                }}
+              {% else %}
+                {{ 'collection-1' | placeholder_svg_tag: 'custom-dress-style-card__placeholder' }}
+              {% endif %}
+            </span>
+
+            <h3 class="custom-dress-style-card__title">
+              {{ card_title | escape }}
+            </h3>
+
+            {% if card_link != blank %}
+              </a>
+            {% else %}
+              </article>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Browse by Dress Style",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "BROWSE BY DRESS STYLE"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "container_max_width",
+      "label": "Container max width",
+      "min": 960,
+      "max": 1440,
+      "step": 20,
+      "unit": "px",
+      "default": 1240
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Section padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Section padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_height_desktop",
+      "label": "Card height desktop",
+      "min": 220,
+      "max": 420,
+      "step": 10,
+      "unit": "px",
+      "default": 290
+    },
+    {
+      "type": "range",
+      "id": "card_height_mobile",
+      "label": "Card height mobile",
+      "min": 140,
+      "max": 260,
+      "step": 10,
+      "unit": "px",
+      "default": 190
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "mobile_card_layout",
+      "label": "Mobile card layout",
+      "options": [
+        {
+          "value": "stacked",
+          "label": "Stacked"
+        },
+        {
+          "value": "compact",
+          "label": "Compact stacked"
+        }
+      ],
+      "default": "stacked"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color",
+      "default": "#F0F0F0"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Design"
+    },
+    {
+      "type": "range",
+      "id": "container_border_radius",
+      "label": "Container border radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "blocks": [
+    {
+      "type": "style_card",
+      "name": "Dress style card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Casual"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "desktop_width",
+          "label": "Desktop width",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "small"
+        },
+        {
+          "type": "select",
+          "id": "image_position",
+          "label": "Image position",
+          "options": [
+            {
+              "value": "center center",
+              "label": "Center"
+            },
+            {
+              "value": "center top",
+              "label": "Top"
+            },
+            {
+              "value": "center bottom",
+              "label": "Bottom"
+            },
+            {
+              "value": "left center",
+              "label": "Left"
+            },
+            {
+              "value": "right center",
+              "label": "Right"
+            }
+          ],
+          "default": "center center"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_link_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Browse by Dress Style",
+      "category": "Collections",
+      "blocks": [
+        {
+          "type": "style_card",
+          "settings": {
+            "title": "Casual",
+            "desktop_width": "small"
+          }
+        },
+        {
+          "type": "style_card",
+          "settings": {
+            "title": "Formal",
+            "desktop_width": "large"
+          }
+        },
+        {
+          "type": "style_card",
+          "settings": {
+            "title": "Party",
+            "desktop_width": "large"
+          }
+        },
+        {
+          "type": "style_card",
+          "settings": {
+            "title": "Gym",
+            "desktop_width": "small"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
