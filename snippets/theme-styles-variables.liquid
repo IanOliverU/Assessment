@@ -684,5 +684,64 @@
     --cart-secondary-font-family: var(--font-{{ settings.cart_price_font }}--family);
     --cart-secondary-font-style: var(--font-{{ settings.cart_price_font }}--style);
     --cart-secondary-font-weight: var(--font-{{ settings.cart_price_font }}--weight);
+
+    /* Custom storefront typography */
+    --font-body--family: 'Satoshi', system-ui, sans-serif;
+    --font-body--style: normal;
+    --font-body--weight: 400;
+    --font-heading--family: 'Integral CF', 'Satoshi', system-ui, sans-serif;
+    --font-heading--style: normal;
+    --font-heading--weight: 700;
+    --font-subheading--family: var(--font-body--family);
+    --font-subheading--style: normal;
+    --font-subheading--weight: 400;
+    --font-accent--family: var(--font-body--family);
+    --font-accent--style: normal;
+    --font-accent--weight: 400;
+    --font-paragraph--family: var(--font-body--family);
+    --font-paragraph--style: normal;
+    --font-paragraph--weight: 400;
+    --font-h1--family: 'Integral CF', 'Satoshi', system-ui, sans-serif;
+    --font-h1--style: normal;
+    --font-h1--weight: 700;
+    --font-h2--family: var(--font-h1--family);
+    --font-h2--style: normal;
+    --font-h2--weight: 700;
+    --font-h3--family: var(--font-h1--family);
+    --font-h3--style: normal;
+    --font-h3--weight: 700;
+    --font-h4--family: var(--font-body--family);
+    --font-h4--style: normal;
+    --font-h5--family: var(--font-body--family);
+    --font-h5--style: normal;
+    --font-h6--family: var(--font-body--family);
+    --font-h6--style: normal;
+    --button-font-family-primary: var(--font-body--family);
+    --button-font-family-secondary: var(--font-body--family);
+    --cart-primary-font-family: var(--font-body--family);
+    --cart-primary-font-style: normal;
+    --cart-primary-font-weight: 400;
+    --cart-secondary-font-family: var(--font-body--family);
+    --cart-secondary-font-style: normal;
+  }
+
+  h1,
+  h2,
+  h3,
+  .h1,
+  .h2,
+  .h3,
+  .hero-title,
+  .section-title,
+  h1 span,
+  h2 span,
+  h3 span,
+  .h1 span,
+  .h2 span,
+  .h3 span,
+  .hero-title span,
+  .section-title span {
+    font-family: 'Integral CF', 'Satoshi', system-ui, sans-serif;
+    font-weight: 700;
   }
 {% endstyle %}
