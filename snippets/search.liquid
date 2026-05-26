@@ -4,6 +4,7 @@
   @param {string} [style] - The style of the search action.
   @param {string} [class] - Additional classes for the search action.
   @param {string} [display_style] - The display style ('icon' or 'text').
+  @param {string} [display_type] - Desktop search presentation ('icon' or 'bar').
 
   @example
   {% render 'search', style: 'default', class: 'custom-class', display_style: 'icon' %}
@@ -11,11 +12,29 @@
 
 {% unless style == 'none' %}
   <search-button
-    class="search-action{% if display_style == 'text' %} search-action--text{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
+    class="search-action{% if display_style == 'text' %} search-action--text{% endif %}{% if display_type == 'bar' %} search-action--bar-enabled{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
   >
+    {% if display_type == 'bar' %}
+      <button
+        on:click="#search-modal/showDialog"
+        class="button-unstyled search-action__bar mobile:hidden"
+        aria-label="{{ 'content.search_input_label' | t }}"
+        aria-haspopup="dialog"
+      >
+        <span
+          class="svg-wrapper search-action__bar-icon"
+          aria-hidden="true"
+        >
+          {{ 'icon-search.svg' | inline_asset_content }}
+        </span>
+        <span class="search-action__bar-placeholder">
+          {{- 'content.search_input_placeholder' | t -}}
+        </span>
+      </button>
+    {% endif %}
     <button
       on:click="#search-modal/showDialog"
-      class="button-unstyled header-actions__action{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      class="button-unstyled header-actions__action{% if display_style == 'text' %} header-actions__text-style{% endif %}{% if display_type == 'bar' %} desktop:hidden{% endif %}"
       aria-label="{{ 'content.search_input_label' | t }}"
       aria-haspopup="dialog"
     >
@@ -38,8 +57,43 @@
     display: flex;
   }
 
+  .search-action__bar {
+    align-items: center;
+    gap: var(--gap-sm);
+    width: 100%;
+    min-height: var(--minimum-touch-target);
+    padding-inline: var(--padding-lg);
+    border-radius: 999px;
+    background: rgb(var(--color-foreground-rgb) / var(--opacity-5));
+    color: var(--color-foreground);
+    font-family: var(--font-body--family);
+    font-size: var(--font-size--sm);
+    text-align: start;
+    transition: background-color var(--animation-speed) var(--animation-easing);
+
+    &:hover {
+      background: rgb(var(--color-foreground-rgb) / var(--opacity-8));
+    }
+
+    &:focus-visible {
+      outline: var(--focus-outline-width) solid var(--color-primary);
+      outline-offset: var(--focus-outline-offset);
+    }
+  }
+
+  .search-action__bar-icon {
+    flex-shrink: 0;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-60));
+  }
+
+  .search-action__bar-placeholder {
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+  }
+
   @media screen and (max-width: 749px) {
-    .search-action--hidden-on-drawer {
+    .search-action--hidden-on-mobile {
       display: none;
     }
   }
@@ -67,6 +121,21 @@
   }
 
   @media screen and (min-width: 750px) {
+    .search-action--bar-enabled {
+      flex: 1 1 18rem;
+      min-width: 12rem;
+      max-width: var(--input-search-max-width);
+    }
+
+    .header__column--right .search-action--bar-enabled {
+      margin-inline: 0;
+    }
+
+    .header__column--right:has(.search-action--bar-enabled) {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
     .header__column--right .search-action--text {
       margin-inline: 0;
     }

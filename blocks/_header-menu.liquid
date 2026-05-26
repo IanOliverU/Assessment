@@ -106,7 +106,17 @@
             {% endif %}
             ref="menuitem"
           >
-            <span class="menu-list__link-title">{{- link.title -}}</span>
+            <span class="menu-list__link-title">
+              {{- link.title -}}
+              {%- if link.links != blank -%}
+                <span
+                  class="svg-wrapper menu-list__chevron"
+                  aria-hidden="true"
+                >
+                  {{- 'icon-caret.svg' | inline_asset_content -}}
+                </span>
+              {%- endif -%}
+            </span>
           </a>
           {%- if link.links != blank -%}
             <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">
@@ -317,7 +327,21 @@
   }
 
   .menu-list__link-title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-3xs);
     padding-inline: calc(var(--gap-xl) / 2);
+  }
+
+  .menu-list__chevron {
+    flex-shrink: 0;
+    width: 0.625rem;
+    height: 0.625rem;
+    transition: transform var(--animation-speed-fast) var(--animation-easing);
+  }
+
+  .menu-list__link[aria-expanded='true'] .menu-list__chevron {
+    transform: rotate(180deg);
   }
   [slot='overflow'] .menu-list__link-title {
     padding-inline: 0;

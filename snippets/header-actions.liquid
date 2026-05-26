@@ -540,7 +540,42 @@
     display: flex;
 
     @media screen and (max-width: 749px) {
-      justify-self: flex-end;
+      display: contents;
+
+      .cart-drawer,
+      .action__cart {
+        grid-area: rightB;
+      }
+
+      .account-button {
+        grid-area: rightC;
+      }
+
+      .cart-drawer,
+      .action__cart,
+      .account-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--minimum-touch-target);
+        height: var(--minimum-touch-target);
+      }
+
+      .header-actions__action {
+        align-items: center;
+        width: var(--minimum-touch-target);
+        height: var(--minimum-touch-target);
+        margin: 0;
+        padding: 0;
+      }
+
+      .account-button shopify-account {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
     }
   }
 

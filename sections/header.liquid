@@ -4,11 +4,12 @@
   assign order = 'logo,menu,localization,search,drawer_search,actions'
 
   if shop.customer_accounts_enabled
-    assign order = 'drawer_search,logo,menu,localization,search,actions'
+    assign order = 'logo,menu,localization,search,drawer_search,actions'
   endif
 
   assign rows = 'top,bottom' | split: ','
   assign search_style = 'none'
+  assign search_display_type = section.settings.search_display_type | default: 'bar'
 
   if section.settings.show_search
     assign search_style = 'modal'
@@ -74,17 +75,22 @@
     assign search_class = 'search-action--hidden-on-drawer'
   endif
 
+  assign drawer_search_class = 'search-action--hidden-on-menu'
+  unless section.settings.search_row == 'bottom'
+    assign drawer_search_class = drawer_search_class | append: ' search-action--hidden-on-mobile'
+  endunless
+
   # Handle localization positioning
   if section.settings.localization_position == 'left'
     if section.settings.search_position == 'left'
       if shop.customer_accounts_enabled
-        assign order = 'drawer_search,logo,search,localization,menu,actions'
+        assign order = 'logo,search,localization,menu,drawer_search,actions'
       else
         assign order = 'logo,search,localization,menu,drawer_search,actions'
       endif
     else
       if shop.customer_accounts_enabled
-        assign order = 'drawer_search,logo,localization,menu,search,actions'
+        assign order = 'logo,localization,menu,search,drawer_search,actions'
       else
         assign order = 'logo,localization,menu,search,drawer_search,actions'
       endif
@@ -92,14 +98,14 @@
   else
     if section.settings.search_position == 'left'
       if shop.customer_accounts_enabled
-        assign order = 'drawer_search,logo,search,menu,localization,actions'
+        assign order = 'logo,search,menu,localization,drawer_search,actions'
       else
         assign order = 'logo,search,menu,localization,drawer_search,actions'
       endif
     endif
   endif
   capture search
-    render 'search', style: search_style, class: search_class, display_style: section.settings.actions_display_style
+    render 'search', style: search_style, class: search_class, display_style: section.settings.actions_display_style, display_type: search_display_type
   endcapture
 
   # Skip drawer search under specific conditions:
@@ -113,7 +119,7 @@
   if section.settings.search_row == 'bottom' or search_style != 'none' and skip_drawer_search == false
     # Mobile search duplicate for when search is not in the right order for mobile layout
     capture drawer_search
-      render 'search', class: 'search-action--hidden-on-menu', style: search_style, display_style: section.settings.actions_display_style
+      render 'search', class: drawer_search_class, style: search_style, display_style: section.settings.actions_display_style, display_type: search_display_type
     endcapture
   endif
 
@@ -299,6 +305,8 @@
 <header-component
   id="header-component"
   class="{{ class }}"
+  data-mobile-logo-position="{{ section.settings.mobile_logo_position | default: 'center' }}"
+  data-search-display-type="{{ search_display_type }}"
   data-theme-color="rgb({{ section.settings.color_scheme_top.settings.background.rgb }})"
   {% if transparent %}
     transparent="{{ transparent }}"
@@ -776,30 +784,28 @@
     }
 
     @media screen and (max-width: 749px) {
-      --header-template-columns: var(--header-mobile-bookend) var(--header-mobile-bookend) 1fr
-        var(--header-mobile-bookend) var(--header-mobile-bookend);
+      --header-template-columns: var(--header-mobile-bookend) minmax(0, 1fr) repeat(3, var(--header-mobile-bookend));
 
-      grid-template-areas: 'leftA leftB center rightA rightB';
+      grid-template-areas: 'left center rightA rightB rightC';
       grid-column: span 3;
       column-gap: 0;
       align-items: center;
       padding-block: 0;
       padding-inline: 0 var(--padding-3xs);
 
+      .header__drawer {
+        grid-area: left;
+      }
+
       .header-logo {
         grid-area: center;
-      }
-
-      &:not(:has(header-actions)) .search-action {
-        grid-area: leftB;
-      }
-
-      &:not(:has(shopify-account)) .search-action {
-        grid-area: rightA;
+        justify-self: center;
+        min-width: 0;
+        overflow: hidden;
       }
 
       .search-action {
-        grid-area: leftB;
+        grid-area: rightA;
       }
 
       header-actions {
@@ -839,6 +845,62 @@
 
     header-actions {
       grid-area: rightB;
+    }
+
+    @media screen and (max-width: 749px) {
+      --header-template-columns: var(--header-mobile-bookend) minmax(0, 1fr) repeat(3, var(--header-mobile-bookend));
+
+      grid-template-areas: 'left center rightA rightB rightC';
+
+      .header__drawer {
+        grid-area: left;
+      }
+
+      .header-logo {
+        justify-self: center;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .search-action {
+        grid-area: rightA;
+      }
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .header__columns:has(.search-action):not(:has(shopify-account)) {
+      --header-template-columns: var(--header-mobile-bookend) minmax(0, 1fr) repeat(2, var(--header-mobile-bookend));
+
+      grid-template-areas: 'left center rightA rightB';
+    }
+
+    .header__columns:not(:has(.search-action)):has(shopify-account) {
+      --header-template-columns: var(--header-mobile-bookend) minmax(0, 1fr) repeat(2, var(--header-mobile-bookend));
+
+      grid-template-areas: 'left center rightB rightC';
+    }
+
+    .header__columns:not(:has(.search-action)):not(:has(shopify-account)) {
+      --header-template-columns: var(--header-mobile-bookend) minmax(0, 1fr) var(--header-mobile-bookend);
+
+      grid-template-areas: 'left center rightB';
+    }
+
+    .header__columns .search-action .header-actions__action {
+      align-items: center;
+      width: var(--header-mobile-bookend);
+      height: var(--header-mobile-bookend);
+      padding: 0;
+    }
+
+    #header-component[data-mobile-logo-position='left'] .header-logo {
+      justify-self: start;
+    }
+
+    .header-logo__image-container,
+    .header-logo__image {
+      max-width: 100%;
     }
   }
 
@@ -1155,6 +1217,22 @@
       "default": "center"
     },
     {
+      "type": "select",
+      "id": "mobile_logo_position",
+      "label": "Mobile logo position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        }
+      ],
+      "default": "center"
+    },
+    {
       "type": "header",
       "content": "t:content.menu"
     },
@@ -1217,6 +1295,23 @@
       "id": "show_search",
       "label": "t:settings.search_icon",
       "default": true
+    },
+    {
+      "type": "select",
+      "id": "search_display_type",
+      "label": "Search display type",
+      "options": [
+        {
+          "value": "icon",
+          "label": "Icon only"
+        },
+        {
+          "value": "bar",
+          "label": "Search bar"
+        }
+      ],
+      "default": "bar",
+      "visible_if": "{{ section.settings.show_search }}"
     },
     {
       "type": "select",
